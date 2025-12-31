@@ -1,0 +1,43 @@
+{
+  "products": {
+    "offers": [
+      {
+        "id": "offer1",
+        "name": "عرض خاص على ساعات اليد",
+        "price": 250,
+        "oldPrice": 350,
+        "discount": 29,
+        "image": "⌚",
+        "description": "خصم 29% على جميع ساعات اليد الفاخرة - عرض لفترة محدودة",
+        "badge": "خصم 29%",
+        "timeLeft": "ينتهي خلال 3 أيام",
+        "category": "offers"
+      }
+    ],
+    "accessories": [
+      {
+        "id": "acc1",
+        "name": "ساعة يد فاخرة",
+        "price": 350,
+        "image": "⌚",
+        "description": "ساعة يد أنيقة بتصميم عصري ومناسب لجميع المناسبات",
+        "badge": "جديد",
+        "category": "accessories"
+      }
+    ]
+  },
+  "paymentMethods": [
+    {
+      "id": "cash",
+      "name": "كاش",
+      "description": "الدفع عند الاستلام",
+      "icon": "money-bill-wave"
+    },
+    {
+      "id": "bank",
+      "name": "تطبيق بنك",
+      "description": "التحويل عبر تطبيق البنك",
+      "icon": "university"
+    }
+  ]
+}
