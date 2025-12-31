@@ -125,24 +125,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // تصدير فئة التطبيق للاستخدام العام
 window.App = App;
-// أضف هذا الكود في نهاية دالة init() في app.js
-initComponents() {
-    // تحديث واجهة السلة
-    if (window.cartManager) {
-        window.cartManager.updateCartUI();
-        
-        // إضافة مستمع حدث مباشر لفتح السلة
-        const cartIcon = document.getElementById('cart-icon');
-        if (cartIcon) {
-            console.log('App: إعداد حدث السلة مباشرة');
-            cartIcon.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('App: فتح السلة مباشرة');
-                window.uiManager?.openCartSidebar();
-            });
-        }
-    }
-    
-    // باقي الكود...
-}
+
