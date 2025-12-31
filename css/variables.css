@@ -1,0 +1,124 @@
+/* المتغيرات والألوان */
+:root {
+    /* الألوان الأساسية */
+    --primary: #3A36E0;
+    --primary-light: #6A66FF;
+    --primary-dark: #2A27B3;
+    --secondary: #FF6B8B;
+    --secondary-light: #FF9EB3;
+    --accent: #00D4AA;
+    --accent-light: #5CFFD6;
+    --dark: #1A1A2E;
+    --dark-light: #2D2D44;
+    --light: #F8F9FF;
+    --gray: #F0F2F5;
+    --gray-dark: #E4E6EF;
+    
+    /* ألوان النصوص */
+    --text: #2D3748;
+    --text-light: #718096;
+    
+    /* ألوان الحالة */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #3B82F6;
+    
+    /* الظلال */
+    --shadow: 0 10px 30px rgba(58, 54, 224, 0.12);
+    --shadow-light: 0 5px 15px rgba(58, 54, 224, 0.08);
+    --shadow-dark: 0 15px 40px rgba(0, 0, 0, 0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    
+    /* الزوايا */
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-lg: 24px;
+    
+    /* التحولات */
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-fast: all 0.15s ease;
+    --transition-slow: all 0.5s ease;
+    
+    /* الأبعاد */
+    --header-height: 75px;
+    --sidebar-width: 380px;
+    --max-width: 1400px;
+    
+    /* أحجام الخطوط */
+    --font-xs: 0.75rem;     /* 12px */
+    --font-sm: 0.875rem;    /* 14px */
+    --font-base: 1rem;      /* 16px */
+    --font-lg: 1.125rem;    /* 18px */
+    --font-xl: 1.25rem;     /* 20px */
+    --font-2xl: 1.5rem;     /* 24px */
+    --font-3xl: 1.875rem;   /* 30px */
+    --font-4xl: 2.25rem;    /* 36px */
+    
+    /* أحجام الأيقونات */
+    --icon-xs: 0.875rem;    /* 14px */
+    --icon-sm: 1rem;        /* 16px */
+    --icon-base: 1.25rem;   /* 20px */
+    --icon-lg: 1.5rem;      /* 24px */
+    --icon-xl: 2rem;        /* 32px */
+    --icon-2xl: 2.5rem;     /* 40px */
+    --icon-3xl: 3rem;       /* 48px */
+}
+
+/* إعادة تعيين */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* أنماط الخطوط */
+@font-face {
+    font-family: 'Cairo';
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-display: swap;
+}
+
+/* التمرير السلس */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Cairo', 'Roboto', sans-serif;
+    background-color: var(--light);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    font-weight: 400;
+    font-size: var(--font-sm);
+    transition: var(--transition);
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* تحسينات للعناوين */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h1 { font-size: var(--font-3xl); }
+h2 { font-size: var(--font-2xl); }
+h3 { font-size: var(--font-xl); }
+h4 { font-size: var(--font-lg); }
+h5 { font-size: var(--font-base); }
+h6 { font-size: var(--font-sm); }
+
+.en-font {
+    font-family: 'Roboto', sans-serif;
+}
