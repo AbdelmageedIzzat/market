@@ -46,24 +46,6 @@ class CheckoutManager {
         const addressField = document.getElementById('delivery-address');
         if (addressField) {
             addressField.placeholder = 'مثال: حي الرياض، شارع الملك فهد، مبنى رقم ٥، شقة ٣٠١';
-            
-            // إضافة نص مساعد إذا لم يكن موجوداً
-            const addressContainer = addressField.parentElement;
-            if (addressContainer && !addressContainer.querySelector('.helper-text')) {
-                const helperText = document.createElement('p');
-                helperText.className = 'helper-text';
-                helperText.style.cssText = `
-                    margin-top: 8px;
-                    color: var(--text-light);
-                    font-size: 0.85rem;
-                    line-height: 1.4;
-                `;
-                helperText.innerHTML = `
-                    <i class="fas fa-info-circle"></i>
-                    أدخل عنوانك بالتفصيل أو أرسل رابط الموقع من خرائط جوجل
-                `;
-                addressContainer.appendChild(helperText);
-            }
         }
     }
     
@@ -123,24 +105,7 @@ class CheckoutManager {
         this.checkoutTotal.textContent = total.toFixed(2) + ' ريال';
     }
     
-    // التحقق من صحة النموذج (مرن)
-    validateCheckoutForm(address, paymentMethod) {
-        const errors = [];
-        
-        // العنوان: تقبل 3 أحرف على الأقل (مرن جداً)
-        if (!address || address.trim().length < 3) {
-            errors.push('يرجى إدخال عنوان الاستلام (3 أحرف على الأقل)');
-        }
-        
-        // طرق الدفع: التأكد من الاختيار
-        if (!paymentMethod) {
-            errors.push('يرجى اختيار طريقة دفع');
-        }
-        
-        return errors;
-    }
-    
-    // إرسال الطلب (محسّن)
+    // إرسال الطلب
     async submitOrderForm(e) {
         e.preventDefault();
         
@@ -154,36 +119,10 @@ class CheckoutManager {
         const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cash';
         const notes = document.getElementById('order-notes')?.value.trim() || '';
         
-        // التحقق من صحة البيانات
-        const validationErrors = this.validateCheckoutForm(address, paymentMethod);
-        if (validationErrors.length > 0) {
-            // عرض أول خطأ فقط
-            window.uiManager?.showNotification('يرجى التصحيح', validationErrors[0], 'error');
-            
-            // إضافة تأثير لحقل العنوان إذا كان هناك خطأ فيه
-            if (validationErrors[0].includes('عنوان')) {
-                const addressField = document.getElementById('delivery-address');
-                if (addressField) {
-                    addressField.style.borderColor = 'var(--danger)';
-                    addressField.focus();
-                    
-                    // إزالة التأثير بعد ثانيتين
-                    setTimeout(() => {
-                        addressField.style.borderColor = '';
-                    }, 2000);
-                }
-            }
-            return;
-        }
-        
-        // تأكيد قبل الإرسال
-        const confirmMessage = `هل تريد تأكيد الطلب وإرساله عبر واتساب؟
-        
-        المنتجات: ${window.cartManager.getItemCount()} منتج
-        المبلغ: ${window.cartManager.getTotal().toFixed(2)} ريال
-        العنوان: ${address.substring(0, 50)}${address.length > 50 ? '...' : ''}`;
-        
-        if (!confirm(confirmMessage)) {
+        // التحقق البسيط من العنوان
+        if (!address || address.trim().length < 3) {
+            window.uiManager?.showNotification('العنوان مطلوب', 'اكتب عنوان التوصيل', 'error');
+            document.getElementById('delivery-address')?.focus();
             return;
         }
         
@@ -200,8 +139,8 @@ class CheckoutManager {
             // حفظ الطلب مؤقتاً
             this.saveOrderToLocalStorage(address, paymentMethod, notes);
             
-            // إظهار رسالة نجاح
-            window.uiManager?.showNotification('تم إنشاء الطلب', 'جارٍ التحويل إلى واتساب...', 'success');
+            // إظهار رسالة تأكيد
+            window.uiManager?.showNotification('جارٍ تحويلك إلى واتساب', 'سيتم فتح تطبيق واتساب لإرسال تفاصيل طلبك');
             
             // إغلاق النوافذ
             this.closeCheckoutModal();
@@ -213,20 +152,128 @@ class CheckoutManager {
             // إعادة تعيين النموذج
             this.checkoutForm.reset();
             
-            // فتح واتساب بعد تأخير قصير
+            // عرض خيار إرسال واتساب
             setTimeout(() => {
-                this.openWhatsApp(message);
-                window.uiManager?.showNotification('تم فتح واتساب', 'أرسل الرسالة لتأكيد طلبك', 'info');
-            }, 800);
+                this.showWhatsAppConfirmation(message);
+            }, 500);
             
         } catch (error) {
             console.error('خطأ في إرسال الطلب:', error);
-            window.uiManager?.showNotification('حدث خطأ', 'حاول مرة أخرى', 'error');
+            window.uiManager?.showNotification('خطأ في الإرسال', 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
         } finally {
             // إعادة تمكين الزر
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
+    }
+    
+    // عرض تأكيد واتساب
+    showWhatsAppConfirmation(message) {
+        // إنشاء نافذة تأكيد
+        const confirmDiv = document.createElement('div');
+        confirmDiv.className = 'whatsapp-confirmation-modal';
+        confirmDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        `;
+        
+        confirmDiv.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: var(--radius);
+                padding: 25px;
+                max-width: 500px;
+                width: 100%;
+                box-shadow: var(--shadow-dark);
+            ">
+                <h3 style="margin-bottom: 15px; color: var(--dark); display: flex; align-items: center; gap: 10px;">
+                    <i class="fab fa-whatsapp" style="color: #25D366; font-size: var(--icon-lg);"></i>
+                    إرسال الطلب عبر واتساب
+                </h3>
+                
+                <p style="margin-bottom: 20px; color: var(--text); line-height: 1.6;">
+                    تم حفظ طلبك بنجاح!<br>
+                    هل تريد إرساله الآن إلى المتجر عبر واتساب؟
+                </p>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button id="send-whatsapp-btn" style="
+                        flex: 1;
+                        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                        color: white;
+                        border: none;
+                        padding: 15px;
+                        border-radius: var(--radius-sm);
+                        font-weight: bold;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                        font-size: var(--font-base);
+                        min-width: 150px;
+                    ">
+                        <i class="fab fa-whatsapp"></i>
+                        نعم، أرسل الآن
+                    </button>
+                    
+                    <button id="cancel-whatsapp-btn" style="
+                        flex: 1;
+                        background: var(--gray);
+                        color: var(--text);
+                        border: none;
+                        padding: 15px;
+                        border-radius: var(--radius-sm);
+                        font-weight: bold;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                        font-size: var(--font-base);
+                        min-width: 150px;
+                    ">
+                        <i class="fas fa-times"></i>
+                        إلغاء
+                    </button>
+                </div>
+                
+                <p style="margin-top: 15px; text-align: center; color: var(--text-light); font-size: 0.85rem;">
+                    يمكنك إرسال الطلب لاحقاً من خلال صفحة الطلبات
+                </p>
+            </div>
+        `;
+        
+        document.body.appendChild(confirmDiv);
+        
+        // زر إرسال واتساب
+        document.getElementById('send-whatsapp-btn').addEventListener('click', () => {
+            confirmDiv.remove();
+            this.openWhatsApp(message);
+        });
+        
+        // زر إلغاء
+        document.getElementById('cancel-whatsapp-btn').addEventListener('click', () => {
+            confirmDiv.remove();
+            window.uiManager?.showNotification('تم حفظ الطلب', 'يمكنك إرساله لاحقاً عبر واتساب', 'info');
+        });
+        
+        // إغلاق عند النقر خارج الصندوق
+        confirmDiv.addEventListener('click', (e) => {
+            if (e.target === confirmDiv) {
+                confirmDiv.remove();
+                window.uiManager?.showNotification('تم حفظ الطلب', 'يمكنك إرساله لاحقاً عبر واتساب', 'info');
+            }
+        });
     }
     
     // إنشاء رسالة الطلب
@@ -302,13 +349,35 @@ class CheckoutManager {
         localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
     }
     
-    // فتح واتساب
+    // فتح واتساب بطريقة آمنة
     openWhatsApp(message) {
         const whatsappNumber = "+249112703344";
         const encodedMessage = encodeURIComponent(message);
         const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
         
-        window.open(whatsappURL, '_blank');
+        // فتح في نافذة جديدة مع منع تأثير زر الرجوع
+        const newWindow = window.open(whatsappURL, '_blank', 'noopener,noreferrer');
+        
+        if (newWindow) {
+            newWindow.focus();
+            window.uiManager?.showNotification('تم فتح واتساب', 'أرسل الرسالة لتأكيد طلبك', 'success');
+        } else {
+            // إذا حُظرت النوافذ المنبثقة، استخدم طريقة بديلة
+            window.uiManager?.showNotification(
+                'تم حفظ الطلب',
+                'يمكنك إرساله يدوياً عبر واتساب',
+                'info'
+            );
+            
+            // عرض الرسالة للمستخدم ليتمكن من نسخها
+            setTimeout(() => {
+                if (confirm('هل تريد نسخ رسالة الطلب؟')) {
+                    navigator.clipboard.writeText(message).then(() => {
+                        window.uiManager?.showNotification('تم النسخ', 'الصق الرسالة في واتساب', 'success');
+                    });
+                }
+            }, 1000);
+        }
     }
 }
 
