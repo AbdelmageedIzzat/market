@@ -13,6 +13,7 @@ class CheckoutManager {
     
     init() {
         this.setupEventListeners();
+        this.addHelperText();
     }
     
     setupEventListeners() {
@@ -38,6 +39,32 @@ class CheckoutManager {
                 this.closeCheckoutModal();
             }
         });
+    }
+    
+    // إضافة نصوص مساعدة
+    addHelperText() {
+        const addressField = document.getElementById('delivery-address');
+        if (addressField) {
+            addressField.placeholder = 'مثال: حي الرياض، شارع الملك فهد، مبنى رقم ٥، شقة ٣٠١';
+            
+            // إضافة نص مساعد إذا لم يكن موجوداً
+            const addressContainer = addressField.parentElement;
+            if (addressContainer && !addressContainer.querySelector('.helper-text')) {
+                const helperText = document.createElement('p');
+                helperText.className = 'helper-text';
+                helperText.style.cssText = `
+                    margin-top: 8px;
+                    color: var(--text-light);
+                    font-size: 0.85rem;
+                    line-height: 1.4;
+                `;
+                helperText.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    أدخل عنوانك بالتفصيل أو أرسل رابط الموقع من خرائط جوجل
+                `;
+                addressContainer.appendChild(helperText);
+            }
+        }
     }
     
     // فتح نافذة الدفع
@@ -96,14 +123,16 @@ class CheckoutManager {
         this.checkoutTotal.textContent = total.toFixed(2) + ' ريال';
     }
     
-    // التحقق من صحة النموذج
+    // التحقق من صحة النموذج (مرن)
     validateCheckoutForm(address, paymentMethod) {
         const errors = [];
         
-        if (!address || address.trim().length < 10) {
-            errors.push('يرجى إدخال عنوان تفصيلي (10 أحرف على الأقل)');
+        // العنوان: تقبل 3 أحرف على الأقل (مرن جداً)
+        if (!address || address.trim().length < 3) {
+            errors.push('يرجى إدخال عنوان الاستلام (3 أحرف على الأقل)');
         }
         
+        // طرق الدفع: التأكد من الاختيار
         if (!paymentMethod) {
             errors.push('يرجى اختيار طريقة دفع');
         }
@@ -111,12 +140,50 @@ class CheckoutManager {
         return errors;
     }
     
-    // إرسال الطلب
+    // إرسال الطلب (محسّن)
     async submitOrderForm(e) {
         e.preventDefault();
         
         if (!window.cartManager || window.cartManager.getItemCount() === 0) {
-            window.uiManager?.showNotification('سلة فارغة', 'يرجى إضافة منتجات إلى السلة أولاً');
+            window.uiManager?.showNotification('السلة فارغة', 'أضف منتجات للسلة أولاً', 'error');
+            return;
+        }
+        
+        // جمع بيانات النموذج
+        const address = document.getElementById('delivery-address')?.value.trim() || '';
+        const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cash';
+        const notes = document.getElementById('order-notes')?.value.trim() || '';
+        
+        // التحقق من صحة البيانات
+        const validationErrors = this.validateCheckoutForm(address, paymentMethod);
+        if (validationErrors.length > 0) {
+            // عرض أول خطأ فقط
+            window.uiManager?.showNotification('يرجى التصحيح', validationErrors[0], 'error');
+            
+            // إضافة تأثير لحقل العنوان إذا كان هناك خطأ فيه
+            if (validationErrors[0].includes('عنوان')) {
+                const addressField = document.getElementById('delivery-address');
+                if (addressField) {
+                    addressField.style.borderColor = 'var(--danger)';
+                    addressField.focus();
+                    
+                    // إزالة التأثير بعد ثانيتين
+                    setTimeout(() => {
+                        addressField.style.borderColor = '';
+                    }, 2000);
+                }
+            }
+            return;
+        }
+        
+        // تأكيد قبل الإرسال
+        const confirmMessage = `هل تريد تأكيد الطلب وإرساله عبر واتساب؟
+        
+        المنتجات: ${window.cartManager.getItemCount()} منتج
+        المبلغ: ${window.cartManager.getTotal().toFixed(2)} ريال
+        العنوان: ${address.substring(0, 50)}${address.length > 50 ? '...' : ''}`;
+        
+        if (!confirm(confirmMessage)) {
             return;
         }
         
@@ -127,28 +194,14 @@ class CheckoutManager {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
         
         try {
-            // جمع بيانات النموذج
-            const address = document.getElementById('delivery-address')?.value.trim() || '';
-            const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cash';
-            const notes = document.getElementById('order-notes')?.value.trim() || '';
-            
-            // التحقق من صحة البيانات
-            const validationErrors = this.validateCheckoutForm(address, paymentMethod);
-            if (validationErrors.length > 0) {
-                validationErrors.forEach(error => {
-                    window.uiManager?.showNotification('خطأ في الإدخال', error, 'error');
-                });
-                throw new Error('خطأ في التحقق من صحة البيانات');
-            }
-            
             // إنشاء رسالة الطلب
             const message = this.createOrderMessage(address, paymentMethod, notes);
             
             // حفظ الطلب مؤقتاً
             this.saveOrderToLocalStorage(address, paymentMethod, notes);
             
-            // إظهار رسالة تأكيد
-            window.uiManager?.showNotification('جارٍ تحويلك إلى واتساب', 'سيتم فتح تطبيق واتساب لإرسال تفاصيل طلبك');
+            // إظهار رسالة نجاح
+            window.uiManager?.showNotification('تم إنشاء الطلب', 'جارٍ التحويل إلى واتساب...', 'success');
             
             // إغلاق النوافذ
             this.closeCheckoutModal();
@@ -163,12 +216,12 @@ class CheckoutManager {
             // فتح واتساب بعد تأخير قصير
             setTimeout(() => {
                 this.openWhatsApp(message);
-                window.uiManager?.showNotification('تم فتح واتساب', 'يرجى إرسال الرسالة إلى المتجر لتأكيد طلبك');
-            }, 1000);
+                window.uiManager?.showNotification('تم فتح واتساب', 'أرسل الرسالة لتأكيد طلبك', 'info');
+            }, 800);
             
         } catch (error) {
             console.error('خطأ في إرسال الطلب:', error);
-            window.uiManager?.showNotification('خطأ في الإرسال', error.message || 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
+            window.uiManager?.showNotification('حدث خطأ', 'حاول مرة أخرى', 'error');
         } finally {
             // إعادة تمكين الزر
             submitBtn.disabled = false;
@@ -176,7 +229,7 @@ class CheckoutManager {
         }
     }
     
-    // إنشاء رسالة الطلب (محسنة)
+    // إنشاء رسالة الطلب
     createOrderMessage(address, paymentMethod, notes) {
         const cartItems = window.cartManager.getAllItems();
         let total = 0;
