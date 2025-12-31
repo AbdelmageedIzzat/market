@@ -14,8 +14,13 @@ class App {
         // التحقق من العناصر المهمة
         this.checkEssentialElements();
         
-        // تحميل البيانات
-        await this.loadData();
+        // تحميل البيانات مع تحسين الأداء
+        try {
+            await this.loadData();
+        } catch (error) {
+            console.error('خطأ في التحميل الرئيسي:', error);
+            this.loadFallbackData();
+        }
         
         // تهيئة المكونات
         this.initComponents();
@@ -29,16 +34,31 @@ class App {
     }
     
     setupErrorHandling() {
-        // معالجة أخطاء JavaScript
+        // معالجة أخطاء JavaScript محسنة
         window.addEventListener('error', (e) => {
-            console.error('حدث خطأ:', e.message, 'في', e.filename, 'سطر', e.lineno);
-            window.uiManager?.showNotification('خطأ في النظام', 'حدث خطأ غير متوقع. يرجى تحديث الصفحة.', 'error');
+            console.error('حدث خطأ:', {
+                message: e.message,
+                file: e.filename,
+                line: e.lineno,
+                column: e.colno,
+                error: e.error
+            });
+            
+            window.uiManager?.showNotification(
+                'خطأ في النظام', 
+                'حدث خطأ غير متوقع. يرجى تحديث الصفحة.', 
+                'error'
+            );
         });
         
         // معالجة الوعود المرفوضة
         window.addEventListener('unhandledrejection', (e) => {
             console.error('وعد مرفوض:', e.reason);
-            window.uiManager?.showNotification('خطأ في النظام', 'حدث خطأ أثناء المعالجة.', 'error');
+            window.uiManager?.showNotification(
+                'خطأ في المعالجة', 
+                'حدث خطأ أثناء تنفيذ العملية.', 
+                'error'
+            );
         });
     }
     
@@ -84,9 +104,27 @@ class App {
             
         } catch (error) {
             console.error('خطأ في تحميل البيانات:', error);
-            window.uiManager?.showNotification('خطأ في التحميل', 'حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة.', 'error');
+            throw error; // إعادة الخطأ للتعامل معه في init
         } finally {
             window.uiManager?.showLoader(false);
+        }
+    }
+    
+    // دالة جديدة للتحميل الاحتياطي
+    async loadFallbackData() {
+        console.log('استخدام البيانات المحلية الاحتياطية');
+        try {
+            window.productsManager?.initCategories();
+            window.productsManager?.initPaymentMethods();
+            window.productsManager?.renderOffers();
+            
+            window.uiManager?.showNotification(
+                'تحميل البيانات',
+                'تم تحميل البيانات المحلية بنجاح',
+                'info'
+            );
+        } catch (error) {
+            console.error('خطأ في تحميل البيانات الاحتياطية:', error);
         }
     }
     
