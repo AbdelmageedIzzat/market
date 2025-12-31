@@ -400,3 +400,28 @@
         font-size: var(--font-sm);
     }
 }
+/* تحسينات الأمان للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .security-tip, .security-notice, .security-badge {
+        font-size: 0.75rem;
+        padding: 8px;
+    }
+    
+    .terms-agreement {
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* الشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+    .char-counter {
+        font-size: 0.7rem;
+    }
+    
+    .security-badge {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+}
