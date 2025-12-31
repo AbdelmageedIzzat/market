@@ -23,7 +23,9 @@ const products = {
             description: 'خصم 29% على جميع ساعات اليد الفاخرة - عرض لفترة محدودة',
             badge: 'خصم 29%',
             timeLeft: 'ينتهي خلال 3 أيام',
-            category: 'offers'
+            category: 'offers',
+            stock: 15,
+            rating: 4.5
         },
         {
             id: 'offer2',
@@ -35,7 +37,9 @@ const products = {
             description: 'مجموعة كاملة من مستحضرات التجميل بخصم 28%',
             badge: 'خصم 28%',
             timeLeft: 'ينتهي خلال 5 أيام',
-            category: 'offers'
+            category: 'offers',
+            stock: 8,
+            rating: 4.2
         },
         {
             id: 'offer3',
@@ -47,7 +51,9 @@ const products = {
             description: 'خصم كبير على الملابس الصيفية بمناسبة الصيف',
             badge: 'خصم 33%',
             timeLeft: 'ينتهي خلال 2 أيام',
-            category: 'offers'
+            category: 'offers',
+            stock: 20,
+            rating: 4.7
         },
         {
             id: 'offer4',
@@ -59,7 +65,9 @@ const products = {
             description: 'سماعات بلوتوث عالية الجودة بخصم 31%',
             badge: 'خصم 31%',
             timeLeft: 'ينتهي خلال 7 أيام',
-            category: 'offers'
+            category: 'offers',
+            stock: 12,
+            rating: 4.8
         },
         {
             id: 'offer5',
@@ -71,7 +79,9 @@ const products = {
             description: 'طقم أدوات مطبخ كامل بخصم 30%',
             badge: 'خصم 30%',
             timeLeft: 'ينتهي خلال 4 أيام',
-            category: 'offers'
+            category: 'offers',
+            stock: 6,
+            rating: 4.6
         },
         {
             id: 'offer6',
@@ -83,7 +93,9 @@ const products = {
             description: 'خصومات هائلة على جميع المنتجات بنهاية الموسم',
             badge: 'خصم 34%',
             timeLeft: 'ينتهي خلال 6 أيام',
-            category: 'offers'
+            category: 'offers',
+            stock: 25,
+            rating: 4.9
         }
     ],
     accessories: [
@@ -94,7 +106,9 @@ const products = {
             image: '⌚',
             description: 'ساعة يد أنيقة بتصميم عصري ومناسب لجميع المناسبات',
             badge: 'جديد',
-            category: 'accessories'
+            category: 'accessories',
+            stock: 10,
+            rating: 4.5
         },
         {
             id: 'acc2',
@@ -103,7 +117,9 @@ const products = {
             image: '🔗',
             description: 'قلادة ذهبية عيار 18 قيراط بتصميم كلاسيكي',
             badge: 'الأكثر مبيعاً',
-            category: 'accessories'
+            category: 'accessories',
+            stock: 5,
+            rating: 4.7
         },
         {
             id: 'acc3',
@@ -112,7 +128,9 @@ const products = {
             image: '💍',
             description: 'خاتم فضة عالي الجودة بتصميم مميز',
             badge: null,
-            category: 'accessories'
+            category: 'accessories',
+            stock: 15,
+            rating: 4.3
         },
         {
             id: 'acc4',
@@ -121,7 +139,9 @@ const products = {
             image: '🕶️',
             description: 'نظارة شمسية UV400 للحماية الكاملة من الشمس',
             badge: 'خصم',
-            category: 'accessories'
+            category: 'accessories',
+            stock: 8,
+            rating: 4.6
         },
         {
             id: 'acc5',
@@ -130,7 +150,9 @@ const products = {
             image: '📿',
             description: 'سوار مصنوع من الجلد الطبيعي بتصميم رجالي',
             badge: null,
-            category: 'accessories'
+            category: 'accessories',
+            stock: 20,
+            rating: 4.4
         },
         {
             id: 'acc6',
@@ -139,7 +161,9 @@ const products = {
             image: '👜',
             description: 'حقيبة يد أنيقة مصنوعة من الجلد الطبيعي',
             badge: 'جديد',
-            category: 'accessories'
+            category: 'accessories',
+            stock: 3,
+            rating: 4.8
         }
     ],
     cosmetics: [
@@ -150,7 +174,9 @@ const products = {
             image: '💄',
             description: 'أحمر شفاه مات طويل الأمد بتدرجات ألوان متنوعة',
             badge: 'جديد',
-            category: 'cosmetics'
+            category: 'cosmetics',
+            stock: 25,
+            rating: 4.5
         },
         {
             id: 'cos2',
@@ -159,7 +185,9 @@ const products = {
             image: '👁️',
             description: 'ماسكارا تعطي رموشك كثافة وطول مضاعف',
             badge: 'الأكثر مبيعاً',
-            category: 'cosmetics'
+            category: 'cosmetics',
+            stock: 18,
+            rating: 4.6
         },
         {
             id: 'cos3',
@@ -168,7 +196,9 @@ const products = {
             image: '💧',
             description: 'كريم أساس خفيف الوزن مع تغطية متوسطة',
             badge: null,
-            category: 'cosmetics'
+            category: 'cosmetics',
+            stock: 12,
+            rating: 4.4
         },
         {
             id: 'cos4',
@@ -177,7 +207,9 @@ const products = {
             image: '🎨',
             description: 'باليت ظلال عيون بألوان ناعمة ولامعة',
             badge: 'خصم',
-            category: 'cosmetics'
+            category: 'cosmetics',
+            stock: 9,
+            rating: 4.7
         },
         {
             id: 'cos5',
@@ -186,7 +218,9 @@ const products = {
             image: '🖌️',
             description: 'كونسيلر سائل عالي التغطية للهالات والعيوب',
             badge: null,
-            category: 'cosmetics'
+            category: 'cosmetics',
+            stock: 22,
+            rating: 4.3
         },
         {
             id: 'cos6',
@@ -195,7 +229,9 @@ const products = {
             image: '💧',
             description: 'سيروم فيتامين سي لتوحيد لون البشرة وإشراقها',
             badge: 'جديد',
-            category: 'cosmetics'
+            category: 'cosmetics',
+            stock: 7,
+            rating: 4.8
         }
     ],
     clothing: [
@@ -206,7 +242,9 @@ const products = {
             image: '👗',
             description: 'فستان سهرة طويل بتصميم أنيق ومناسب للمناسبات',
             badge: 'جديد',
-            category: 'clothing'
+            category: 'clothing',
+            stock: 6,
+            rating: 4.9
         },
         {
             id: 'clo2',
@@ -215,7 +253,9 @@ const products = {
             image: '👖',
             description: 'جينز ضيق مريح ومصمم ليعطي مظهراً أنيقاً',
             badge: 'الأكثر مبيعاً',
-            category: 'clothing'
+            category: 'clothing',
+            stock: 15,
+            rating: 4.7
         },
         {
             id: 'clo3',
@@ -224,7 +264,9 @@ const products = {
             image: '👕',
             description: 'بلوزة نسائية مصنوعة من الحرير الطبيعي',
             badge: null,
-            category: 'clothing'
+            category: 'clothing',
+            stock: 10,
+            rating: 4.5
         },
         {
             id: 'clo4',
@@ -233,7 +275,9 @@ const products = {
             image: '🧥',
             description: 'كارديجان صوفي دافئ بأزرار خشبية',
             badge: 'خصم',
-            category: 'clothing'
+            category: 'clothing',
+            stock: 8,
+            rating: 4.6
         },
         {
             id: 'clo5',
@@ -242,7 +286,9 @@ const products = {
             image: '👕',
             description: 'تي شيرت قطني 100% بألوان متنوعة',
             badge: null,
-            category: 'clothing'
+            category: 'clothing',
+            stock: 30,
+            rating: 4.4
         },
         {
             id: 'clo6',
@@ -251,7 +297,9 @@ const products = {
             image: '🧥',
             description: 'جاكيت جلد طبيعي بتصميم كلاسيكي',
             badge: 'جديد',
-            category: 'clothing'
+            category: 'clothing',
+            stock: 4,
+            rating: 4.8
         }
     ],
     electronics: [
@@ -262,7 +310,9 @@ const products = {
             image: '🎧',
             description: 'سماعات بلوتوث لاسلكية مع عزل صوتي ممتاز',
             badge: 'جديد',
-            category: 'electronics'
+            category: 'electronics',
+            stock: 12,
+            rating: 4.8
         },
         {
             id: 'elec2',
@@ -271,7 +321,9 @@ const products = {
             image: '🔌',
             description: 'شاحن سريع للهواتف بقوة 65 واط',
             badge: 'الأكثر مبيعاً',
-            category: 'electronics'
+            category: 'electronics',
+            stock: 25,
+            rating: 4.6
         },
         {
             id: 'elec3',
@@ -280,7 +332,9 @@ const products = {
             image: '🔊',
             description: 'سماعة ذكية مع مساعد صوتي مدمج',
             badge: null,
-            category: 'electronics'
+            category: 'electronics',
+            stock: 7,
+            rating: 4.7
         },
         {
             id: 'elec4',
@@ -289,7 +343,9 @@ const products = {
             image: '⌚',
             description: 'ساعة ذكية مع شاشة AMOLED ومراقبة صحية',
             badge: 'خصم',
-            category: 'electronics'
+            category: 'electronics',
+            stock: 5,
+            rating: 4.9
         },
         {
             id: 'elec5',
@@ -298,7 +354,9 @@ const products = {
             image: '📹',
             description: 'كاميرا مراقبة ذكية مع رؤية ليلية',
             badge: null,
-            category: 'electronics'
+            category: 'electronics',
+            stock: 9,
+            rating: 4.5
         },
         {
             id: 'elec6',
@@ -307,7 +365,9 @@ const products = {
             image: '⌨️',
             description: 'لوحة مفاتيح ميكانيكية مع إضاءة RGB',
             badge: 'جديد',
-            category: 'electronics'
+            category: 'electronics',
+            stock: 14,
+            rating: 4.6
         }
     ],
     home: [
@@ -318,7 +378,9 @@ const products = {
             image: '🧶',
             description: 'سجادة صوف طبيعي بتصميم شرقي',
             badge: 'جديد',
-            category: 'home'
+            category: 'home',
+            stock: 4,
+            rating: 4.7
         },
         {
             id: 'home2',
@@ -327,7 +389,9 @@ const products = {
             image: '🍽️',
             description: 'مفرش طاولة قطني مقاوم للبقع',
             badge: 'الأكثر مبيعاً',
-            category: 'home'
+            category: 'home',
+            stock: 20,
+            rating: 4.4
         },
         {
             id: 'home3',
@@ -336,7 +400,9 @@ const products = {
             image: '🛏️',
             description: 'مجموعة وسائد زخرفية بألوان متناسقة',
             badge: null,
-            category: 'home'
+            category: 'home',
+            stock: 15,
+            rating: 4.3
         },
         {
             id: 'home4',
@@ -345,7 +411,9 @@ const products = {
             image: '🫖',
             description: 'إبريق شاي سيراميك مع 4 أكواب',
             badge: 'خصم',
-            category: 'home'
+            category: 'home',
+            stock: 8,
+            rating: 4.6
         },
         {
             id: 'home5',
@@ -354,7 +422,9 @@ const products = {
             image: '🕯️',
             description: 'شمعدان زجاجي بتصميم عصري',
             badge: null,
-            category: 'home'
+            category: 'home',
+            stock: 12,
+            rating: 4.5
         },
         {
             id: 'home6',
@@ -363,7 +433,9 @@ const products = {
             image: '💡',
             description: 'مصباح أرضي مع شدة إضاءة قابلة للتعديل',
             badge: 'جديد',
-            category: 'home'
+            category: 'home',
+            stock: 6,
+            rating: 4.8
         }
     ]
 };
@@ -408,8 +480,20 @@ async function loadProductsFromJSON() {
         const response = await fetch('data/products.json');
         if (response.ok) {
             const data = await response.json();
-            Object.assign(products, data.products);
-            Object.assign(paymentMethods, data.paymentMethods);
+            
+            // دمج البيانات مع الحفاظ على البيانات الحالية
+            if (data.products) {
+                Object.keys(data.products).forEach(category => {
+                    if (products[category]) {
+                        products[category] = [...products[category], ...data.products[category]];
+                    }
+                });
+            }
+            
+            if (data.paymentMethods) {
+                paymentMethods.push(...data.paymentMethods);
+            }
+            
             return true;
         }
     } catch (error) {
@@ -541,6 +625,10 @@ function renderOffers() {
                                     <div class="new-price">${offer.price} ريال</div>
                                     <div class="discount-percent">%${offer.discount}</div>
                                 </div>
+                                <div class="stock-info">
+                                    <i class="fas fa-box"></i>
+                                    <span>المتبقي: ${offer.stock || 10}</span>
+                                </div>
                                 <div class="offer-actions">
                                     <div class="time-left">
                                         <i class="fas fa-clock"></i>
@@ -606,6 +694,16 @@ function renderProducts(categoryId) {
                             </div>
                             <h3 class="product-name">${product.name}</h3>
                             <p class="product-description">${product.description}</p>
+                            <div class="product-meta">
+                                <div class="stock-info">
+                                    <i class="fas fa-box"></i>
+                                    <span>المتبقي: ${product.stock || 10}</span>
+                                </div>
+                                <div class="rating-info">
+                                    <i class="fas fa-star"></i>
+                                    <span>${product.rating || 4.0}</span>
+                                </div>
+                            </div>
                             <div class="product-footer">
                                 <div class="product-price">${product.price}<span> ريال</span></div>
                                 <div class="product-actions">
@@ -724,6 +822,37 @@ function getCategoryName(categoryId) {
     return category ? category.name : '';
 }
 
+// دالة للبحث عن المنتجات
+function searchProducts(searchTerm) {
+    const results = [];
+    const term = searchTerm.toLowerCase().trim();
+    
+    if (!term) return results;
+    
+    Object.entries(products).forEach(([categoryId, categoryProducts]) => {
+        categoryProducts.forEach(product => {
+            if (product.name.toLowerCase().includes(term) || 
+                product.description.toLowerCase().includes(term)) {
+                results.push({
+                    ...product,
+                    category: categoryId,
+                    categoryName: getCategoryName(categoryId)
+                });
+            }
+        });
+    });
+    
+    return results;
+}
+
+// دالة لتصفية المنتجات حسب السعر
+function filterProducts(categoryId, minPrice = 0, maxPrice = Infinity) {
+    const categoryProducts = products[categoryId] || [];
+    return categoryProducts.filter(product => 
+        product.price >= minPrice && product.price <= maxPrice
+    );
+}
+
 // تصدير الدوال
 window.productsManager = {
     categories,
@@ -736,5 +865,7 @@ window.productsManager = {
     renderProducts,
     getProductById,
     getCategoryName,
+    searchProducts,
+    filterProducts,
     loadProductsFromJSON
 };
