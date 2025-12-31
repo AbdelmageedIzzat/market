@@ -11,6 +11,12 @@
     <meta name="author" content="Global Store">
     <meta name="robots" content="index, follow">
     
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3A36E0">
+    
     <!-- Open Graph Tags -->
     <meta property="og:title" content="Global Store - متجر عالمي">
     <meta property="og:description" content="أفضل المنتجات بأسعار تنافسية">
@@ -42,6 +48,20 @@
     }
     </script>
     
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Global Store",
+        "url": "https://globalstore.com",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://globalstore.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    
     <!-- روابط الخطوط والأيقونات -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,6 +72,8 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
 </head>
 <body>
     <!-- زر العودة للأعلى -->
@@ -75,10 +97,29 @@
             </a>
             
             <div class="header-actions">
+                <!-- منطقة البحث -->
+                <div class="search-container" id="search-container"></div>
+                
+                <!-- أيقونة المفضلة -->
+                <div class="wishlist-icon" id="wishlist-icon" style="display: none;">
+                    <i class="far fa-heart"></i>
+                    <span class="wishlist-count">0</span>
+                </div>
+                
+                <!-- أيقونة المقارنة -->
+                <div class="compare-icon" id="compare-icon" style="display: none;">
+                    <i class="fas fa-balance-scale"></i>
+                    <span class="compare-count">0</span>
+                </div>
+                
+                <!-- أيقونة السلة -->
                 <div class="cart-icon" id="cart-icon">
                     <i class="fas fa-shopping-bag"></i>
                     <span class="cart-count" id="cart-count">0</span>
                 </div>
+                
+                <!-- زر السمات -->
+                <div class="theme-selector" id="theme-selector"></div>
             </div>
         </div>
     </header>
@@ -90,15 +131,42 @@
         </div>
     </nav>
 
+    <!-- لوحة التصفية -->
+    <aside class="filter-sidebar" id="filter-sidebar">
+        <button class="filter-toggle" id="filter-toggle">
+            <i class="fas fa-filter"></i>
+            <span>التصفية والترتيب</span>
+        </button>
+        
+        <div class="filter-panel" id="filter-panel"></div>
+    </aside>
+
     <!-- المحتوى الرئيسي -->
     <main class="main-content">
-        <!-- صفحات الفئات (سيتم ملؤها ديناميكياً) -->
-        <section id="offers" class="category-section active"></section>
+        <!-- صفحة العروض -->
+        <section id="offers" class="category-section active">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-tags"></i>
+                    العروض والخصومات
+                </h2>
+                <div class="products-count" id="offers-count">6 منتج</div>
+            </div>
+            <div class="offers-grid" id="offers-grid"></div>
+        </section>
+        
+        <!-- فئات المنتجات -->
         <section id="accessories" class="category-section"></section>
         <section id="cosmetics" class="category-section"></section>
         <section id="clothing" class="category-section"></section>
         <section id="electronics" class="category-section"></section>
         <section id="home" class="category-section"></section>
+        
+        <!-- قسم التوصيات -->
+        <section class="recommendations-section" id="recommendations-section"></section>
+        
+        <!-- لوحة التحكم -->
+        <section class="dashboard-section" id="dashboard-section" style="display: none;"></section>
     </main>
 
     <!-- سلة المشتريات الجانبية -->
@@ -115,11 +183,18 @@
         
         <div class="cart-items" id="cart-items"></div>
         
+        <!-- اقتراحات إضافية -->
+        <div class="cart-suggestions" id="cart-suggestions"></div>
+        
         <div class="cart-footer">
             <div class="cart-summary">
                 <div class="summary-row">
                     <span>المجموع الجزئي</span>
                     <span id="cart-subtotal">0.00 ريال</span>
+                </div>
+                <div class="summary-row loyalty-discount" style="display: none;">
+                    <span>خصم الولاء</span>
+                    <span id="loyalty-discount">-0.00 ريال</span>
                 </div>
                 <div class="summary-row total">
                     <span>المجموع الكلي</span>
@@ -135,9 +210,19 @@
                 <button class="continue-shopping" id="continue-shopping">
                     متابعة التسوق
                 </button>
+                <button class="save-cart" id="save-cart">
+                    <i class="fas fa-save"></i>
+                    حفظ السلة
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- نافذة المفضلة -->
+    <div class="wishlist-modal" id="wishlist-modal" style="display: none;"></div>
+    
+    <!-- نافذة المقارنة -->
+    <div class="comparison-modal" id="comparison-modal" style="display: none;"></div>
 
     <!-- نافذة إتمام الطلب -->
     <div class="checkout-modal" id="checkout-modal">
@@ -154,6 +239,19 @@
             
             <div class="checkout-body">
                 <form id="checkout-form">
+                    <!-- قسم معلومات العميل -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-user"></i> معلومات العميل</h4>
+                        <div class="form-group">
+                            <label for="customer-name">الاسم الكامل</label>
+                            <input type="text" id="customer-name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">رقم الهاتف</label>
+                            <input type="tel" id="customer-phone" class="form-input" required>
+                        </div>
+                    </div>
+                    
                     <div class="whatsapp-notice">
                         <i class="fab fa-whatsapp"></i>
                         سيتم تحويلك إلى تطبيق واتساب لإرسال تفاصيل طلبك إلى المتجر
@@ -178,6 +276,18 @@
                         <div class="payment-methods" id="payment-methods"></div>
                     </div>
                     
+                    <!-- خصم الولاء -->
+                    <div class="loyalty-points-section" id="loyalty-points-section" style="display: none;">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="use-loyalty-points">
+                                <i class="fas fa-coins"></i>
+                                استخدام نقاط الولاء
+                            </label>
+                            <div class="points-info" id="points-info"></div>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label class="form-label" for="order-notes">
                             <i class="fas fa-sticky-note"></i>
@@ -195,8 +305,14 @@
                         <div class="checkout-items" id="checkout-items"></div>
                         
                         <div class="checkout-footer">
-                            <span class="total-label">المجموع الكلي:</span>
-                            <span class="total-price" id="checkout-total">0.00 ريال</span>
+                            <div class="total-row">
+                                <span class="total-label">المجموع الكلي:</span>
+                                <span class="total-price" id="checkout-total">0.00 ريال</span>
+                            </div>
+                            <div class="points-earned" id="points-earned" style="display: none;">
+                                <i class="fas fa-star"></i>
+                                ستحصل على <span id="points-amount">0</span> نقطة مكافأة
+                            </div>
                         </div>
                     </div>
                     
@@ -209,6 +325,9 @@
         </div>
     </div>
 
+    <!-- منطقة الإشعارات في الوقت الحقيقي -->
+    <div class="notification-area" id="notification-area"></div>
+
     <!-- إشعارات -->
     <div class="notification" id="notification">
         <i class="fas fa-check-circle notification-icon"></i>
@@ -219,6 +338,14 @@
         <button class="notification-close" id="notification-close">
             <i class="fas fa-times"></i>
         </button>
+    </div>
+    
+    <!-- مؤشر التحميل -->
+    <div class="global-loader" id="global-loader" style="display: none;">
+        <div class="loader-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>جاري التحميل...</p>
+        </div>
     </div>
 
     <!-- تذييل الصفحة -->
@@ -246,6 +373,16 @@
             </div>
             
             <div class="footer-section">
+                <h4 class="footer-title">خدمات إضافية</h4>
+                <div class="footer-links">
+                    <a href="#" id="dashboard-link"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+                    <a href="#" id="wishlist-link"><i class="fas fa-heart"></i> المفضلة</a>
+                    <a href="#" id="compare-link"><i class="fas fa-balance-scale"></i> مقارنة المنتجات</a>
+                    <a href="#" id="reviews-link"><i class="fas fa-star"></i> التقييمات</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
                 <h4 class="footer-title">معلومات الاتصال</h4>
                 <div class="footer-info">
                     <p>
@@ -270,13 +407,28 @@
         
         <div class="copyright">
             © 2024 جميع الحقوق محفوظة - Global Store | تصميم وتطوير متجر عالمي
+            <br>
+            <small id="app-version">الإصدار 1.0.0</small>
         </div>
     </footer>
 
+    <!-- ملفات JavaScript -->
     <script src="js/products.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/checkout.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- ملفات الميزات الجديدة -->
+    <script src="js/wishlist.js"></script>
+    <script src="js/filter.js"></script>
+    <script src="js/recommendations.js"></script>
+    <script src="js/loyalty.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/alerts.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/updates.js"></script>
 </body>
 </html>
