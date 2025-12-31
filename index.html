@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Store - متجر عالمي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- زر العودة للأعلى -->
+    <button class="back-to-top" id="back-to-top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- خلفية متحركة -->
+    <div class="bg-animation">
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+    </div>
+
+    <!-- الشريط العلوي -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo" id="home-logo">
+                <i class="fas fa-globe-americas"></i>
+                <span>Global Store</span>
+            </a>
+            
+            <div class="header-actions">
+                <div class="cart-icon" id="cart-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- قائمة الفئات -->
+    <nav class="categories-nav">
+        <div class="categories-container">
+            <div class="categories" id="categories"></div>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- صفحات الفئات (سيتم ملؤها ديناميكياً) -->
+        <section id="offers" class="category-section active"></section>
+        <section id="accessories" class="category-section"></section>
+        <section id="cosmetics" class="category-section"></section>
+        <section id="clothing" class="category-section"></section>
+        <section id="electronics" class="category-section"></section>
+        <section id="home" class="category-section"></section>
+    </main>
+
+    <!-- سلة المشتريات الجانبية -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3 class="cart-title">
+                <i class="fas fa-shopping-bag"></i>
+                سلة المشتريات
+            </h3>
+            <button class="close-cart" id="close-cart">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="cart-items" id="cart-items"></div>
+        
+        <div class="cart-footer">
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>المجموع الجزئي</span>
+                    <span id="cart-subtotal">0.00 ريال</span>
+                </div>
+                <div class="summary-row total">
+                    <span>المجموع الكلي</span>
+                    <span id="cart-total">0.00 ريال</span>
+                </div>
+            </div>
+            
+            <div class="cart-actions">
+                <button class="checkout-btn" id="checkout-btn">
+                    <i class="fas fa-shopping-bag"></i>
+                    إتمام الطلب
+                </button>
+                <button class="continue-shopping" id="continue-shopping">
+                    متابعة التسوق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إتمام الطلب -->
+    <div class="checkout-modal" id="checkout-modal">
+        <div class="checkout-content">
+            <div class="checkout-header">
+                <h3 class="checkout-title">
+                    <i class="fas fa-shopping-bag"></i>
+                    إتمام الطلب
+                </h3>
+                <button class="close-checkout" id="close-checkout">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="checkout-body">
+                <form id="checkout-form">
+                    <div class="whatsapp-notice">
+                        <i class="fab fa-whatsapp"></i>
+                        سيتم تحويلك إلى تطبيق واتساب لإرسال تفاصيل طلبك إلى المتجر
+                    </div>
+                    
+                    <!-- العنوان -->
+                    <div class="form-group">
+                        <label class="form-label" for="delivery-address">
+                            <i class="fas fa-map-marker-alt"></i>
+                            عنوان الاستلام
+                        </label>
+                        <textarea id="delivery-address" class="form-textarea" 
+                                  placeholder="أدخل عنوان التوصيل بالتفصيل (المدينة - الحي - الشارع - رقم المنزل)"
+                                  minlength="10"
+                                  maxlength="500"
+                                  required></textarea>
+                        <div class="char-counter" id="address-counter">
+                            <span>0</span>/500 حرف
+                        </div>
+                        <div class="security-tip">
+                            <i class="fas fa-shield-alt"></i>
+                            نحن نحافظ على خصوصية عنوانك ولا نشاركه مع أي طرف ثالث
+                        </div>
+                    </div>
+                    
+                    <!-- طريقة الدفع -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-credit-card"></i>
+                            طريقة الدفع
+                        </label>
+                        <div class="payment-methods" id="payment-methods"></div>
+                    </div>
+                    
+                    <!-- الملاحظات (نسخة واحدة فقط) -->
+                    <div class="form-group">
+                        <label class="form-label" for="order-notes">
+                            <i class="fas fa-sticky-note"></i>
+                            ملاحظات إضافية (اختياري)
+                        </label>
+                        <textarea id="order-notes" class="form-textarea" 
+                                  placeholder="ملاحظات حول الطلب (توقيت التوصيل - تعليمات خاصة - إلخ)"
+                                  maxlength="500"></textarea>
+                        <div class="char-counter" id="notes-counter">
+                            <span>0</span>/500 حرف
+                        </div>
+                        <div class="security-notice">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            لا تقم بإدراج روابط أو معلومات اتصال شخصية في الملاحظات
+                        </div>
+                    </div>
+                    
+                    <!-- الشروط والخصوصية -->
+                    <div class="terms-agreement">
+                        <input type="checkbox" id="terms-agree" required>
+                        <label for="terms-agree">
+                            أوافق على <a href="#" class="terms-link">الشروط والأحكام</a> و 
+                            <a href="#" class="privacy-link">سياسة الخصوصية</a>
+                        </label>
+                    </div>
+                    
+                    <div class="security-badge">
+                        <i class="fas fa-lock"></i>
+                        <span>معلوماتك محمية بتشفير SSL</span>
+                    </div>
+                    
+                    <!-- ملخص الطلب -->
+                    <div class="checkout-summary">
+                        <h4 class="summary-title">
+                            <i class="fas fa-receipt"></i>
+                            ملخص الطلب
+                        </h4>
+                        
+                        <div class="checkout-items" id="checkout-items"></div>
+                        
+                        <div class="checkout-footer">
+                            <span class="total-label">المجموع الكلي:</span>
+                            <span class="total-price" id="checkout-total">0.00 ريال</span>
+                        </div>
+                    </div>
+                    
+                    <!-- زر الإرسال -->
+                    <button type="submit" class="submit-order" id="submit-order">
+                        <i class="fas fa-paper-plane"></i>
+                        تأكيد الطلب وإرسال عبر واتساب
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- إشعارات -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle notification-icon"></i>
+        <div class="notification-content">
+            <div class="notification-title" id="notification-title">تمت الإضافة بنجاح</div>
+            <div class="notification-message" id="notification-message">تم إضافة المنتج إلى سلة المشتريات</div>
+        </div>
+        <button class="notification-close" id="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <i class="fas fa-globe-americas"></i>
+                    <span>Global Store</span>
+                </div>
+                <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.95rem; line-height: 1.7;">
+                    متجر عالمي يقدم أفضل المنتجات بأسعار تنافسية وجودة عالية. تسوق الآن واستمتع بتجربة تسوق فريدة.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-title">روابط سريعة</h4>
+                <div class="footer-links" id="footer-links"></div>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-title">معلومات الاتصال</h4>
+                <div class="footer-info">
+                    <p>
+                        <i class="fas fa-phone"></i>
+                        <span>واتساب المتجر: +249112703344</span>
+                    </p>
+                    <p>
+                        <i class="fas fa-envelope"></i>
+                        <span>البريد الإلكتروني: info@globalstore.com</span>
+                    </p>
+                    <p>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>العنوان: الخرطوم، السودان</span>
+                    </p>
+                    <p>
+                        <i class="fas fa-clock"></i>
+                        <span>ساعات العمل: 24/7</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            © 2024 جميع الحقوق محفوظة - Global Store | تصميم وتطوير متجر عالمي
+        </div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/checkout.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
