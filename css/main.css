@@ -1851,12 +1851,14 @@ button:active {
 .offer-info .stock-info i {
     color: var(--success);
 }
-/* أنماط نافذة التأكيد */
-.confirmation-modal {
+/* أضف هذا في نهاية ملف main.css */
+
+/* نافذة تأكيد واتساب */
+.whatsapp-confirmation-modal {
     animation: fadeIn 0.3s ease;
 }
 
-.confirmation-content {
+.whatsapp-confirmation-modal > div {
     animation: slideUp 0.3s ease;
 }
 
@@ -1868,5 +1870,21 @@ button:active {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+/* تحسينات للهواتف */
+@media (max-width: 576px) {
+    .whatsapp-confirmation-modal {
+        padding: 10px;
+    }
+    
+    .whatsapp-confirmation-modal > div {
+        padding: 20px;
+    }
+    
+    .whatsapp-confirmation-modal button {
+        min-width: 100% !important;
+        margin-bottom: 10px;
     }
 }
