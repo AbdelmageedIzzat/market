@@ -482,3 +482,50 @@
         font-size: var(--font-sm);
     }
 }
+/* إضافة هذه الأنماط في نهاية ملف responsive.css */
+
+/* تحسينات للبحث في الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .search-container {
+        margin-left: 0;
+        margin-bottom: 10px;
+        order: -1;
+        width: 100%;
+    }
+    
+    .search-box {
+        min-width: 100%;
+    }
+    
+    .search-results {
+        position: fixed;
+        left: 15px;
+        right: 15px;
+        top: 130px;
+        max-height: 60vh;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-box {
+        padding: 6px 12px;
+    }
+    
+    .search-results {
+        top: 120px;
+    }
+}
+
+/* تحسينات للوضع الأفقي */
+@media (max-height: 600px) and (orientation: landscape) {
+    .search-results {
+        max-height: 50vh;
+    }
+}
+
+/* تحسينات للشاشات صغيرة الحجم */
+@media (max-width: 320px) {
+    .search-box {
+        min-width: 180px;
+    }
+}
