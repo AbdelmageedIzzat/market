@@ -51,6 +51,11 @@
             overflow-x: hidden;
             font-weight: 400;
             font-size: 14px;
+            transition: var(--transition);
+        }
+
+        body.modal-open {
+            overflow: hidden;
         }
 
         /* الخطوط - تم تصغيرها */
@@ -895,9 +900,14 @@
             font-family: 'Cairo', sans-serif;
         }
 
-        .checkout-btn:hover {
+        .checkout-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 107, 139, 0.4);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .continue-shopping {
@@ -1189,7 +1199,7 @@
             font-family: 'Cairo', sans-serif;
         }
 
-        .submit-order:hover {
+        .submit-order:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(58, 54, 224, 0.4);
         }
@@ -2454,7 +2464,44 @@
         const notificationClose = document.getElementById('notification-close');
         const homeLogo = document.getElementById('home-logo');
 
-        // تهيئة الفئات
+        // ==================== إصلاحات وتحسينات ====================
+
+        // معالجة فتح نافذة الدفع
+        function handleCheckout(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('تم النقر على زر إتمام الطلب');
+            console.log('عدد المنتجات في السلة:', cart.length);
+            
+            if (cart.length === 0) {
+                showNotification('السلة فارغة', 'يرجى إضافة منتجات إلى السلة أولاً');
+                return;
+            }
+            
+            console.log('إعداد صفحة الدفع...');
+            setupCheckout();
+            
+            console.log('فتح نافذة الدفع...');
+            checkoutModal.classList.add('active');
+            document.body.classList.add('modal-open');
+            
+            // تمكين زر الإرسال
+            submitOrder.disabled = false;
+        }
+
+        // إغلاق نافذة الدفع
+        function closeCheckoutModal() {
+            checkoutModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+
+        // إغلاق سلة المشتريات
+        function closeCartSidebar() {
+            cartSidebar.classList.remove('active');
+        }
+
+        // ==================== تهيئة الفئات ====================
         function initCategories() {
             categories.forEach(category => {
                 const button = document.createElement('button');
@@ -2486,7 +2533,7 @@
             renderOffers();
         }
 
-        // تبديل الفئة
+        // ==================== تبديل الفئة ====================
         function switchCategory(categoryId) {
             // تحديث أزرار الفئات
             document.querySelectorAll('.category-btn').forEach(btn => {
@@ -2523,7 +2570,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // عرض العروض
+        // ==================== عرض العروض ====================
         function renderOffers() {
             const offersGrid = document.getElementById('offers-grid');
             if (!offersGrid) return;
@@ -2595,7 +2642,7 @@
             });
         }
 
-        // عرض المنتجات
+        // ==================== عرض المنتجات ====================
         function renderProducts(categoryId) {
             const productsGrid = document.getElementById(`${categoryId}-products`);
             if (!productsGrid) return;
@@ -2661,7 +2708,7 @@
             addProductEventListeners();
         }
 
-        // إضافة مستمعي الأحداث للمنتجات
+        // ==================== إضافة مستمعي الأحداث للمنتجات ====================
         function addProductEventListeners() {
             // أزرار إضافة إلى السلة
             document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
@@ -2698,7 +2745,7 @@
             });
         }
 
-        // تحديث عدد المنتجات في الفئة
+        // ==================== تحديث عدد المنتجات ====================
         function updateProductsCount(categoryId) {
             const categoryProducts = products[categoryId] || [];
             const countElement = document.querySelector(`#${categoryId} .products-count`);
@@ -2707,7 +2754,7 @@
             }
         }
 
-        // إضافة منتج إلى السلة
+        // ==================== إضافة منتج إلى السلة ====================
         function addToCart(productId) {
             // البحث عن المنتج في جميع الفئات
             let product = null;
@@ -2745,7 +2792,7 @@
             showNotification('تمت الإضافة بنجاح', `تم إضافة ${product.name} إلى سلة المشتريات`);
         }
 
-        // تحديث واجهة المنتج
+        // ==================== تحديث واجهة المنتج ====================
         function updateProductUI(productId, categoryId) {
             // تحديث واجهة المنتج في الفئة الحالية
             const quantityElement = document.getElementById(`quantity-${productId}`);
@@ -2776,7 +2823,7 @@
             }
         }
 
-        // تحديث كمية منتج في السلة
+        // ==================== تحديث كمية منتج في السلة ====================
         function updateCartItemQuantity(productId, change) {
             const itemIndex = cart.findIndex(item => item.id === productId);
             
@@ -2810,7 +2857,7 @@
             }
         }
 
-        // إزالة منتج من السلة
+        // ==================== إزالة منتج من السلة ====================
         function removeFromCart(productId) {
             cart = cart.filter(item => item.id !== productId);
             saveCart();
@@ -2833,7 +2880,7 @@
             showNotification('تمت الإزالة', 'تمت إزالة المنتج من سلة المشتريات');
         }
 
-        // تحديث واجهة السلة
+        // ==================== تحديث واجهة السلة ====================
         function updateCartUI() {
             // تحديث عدد العناصر في السلة
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -2844,9 +2891,12 @@
             
             // تحديث الإجماليات
             updateCartTotals();
+            
+            // تحديث حالة زر إتمام الطلب
+            checkoutBtn.disabled = totalItems === 0;
         }
 
-        // عرض محتويات السلة
+        // ==================== عرض محتويات السلة ====================
         function renderCart() {
             cartItemsContainer.innerHTML = '';
             
@@ -2903,7 +2953,7 @@
             addCartEventListeners();
         }
 
-        // إضافة مستمعي الأحداث لعناصر السلة
+        // ==================== إضافة مستمعي الأحداث لعناصر السلة ====================
         function addCartEventListeners() {
             // أزرار زيادة الكمية في السلة
             document.querySelectorAll('.cart-item .quantity-btn.plus').forEach(btn => {
@@ -2930,19 +2980,26 @@
             });
         }
 
-        // تحديث إجماليات السلة
+        // ==================== تحديث إجماليات السلة ====================
         function updateCartTotals() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             cartSubtotal.textContent = subtotal.toFixed(2) + ' ريال';
             cartTotal.textContent = subtotal.toFixed(2) + ' ريال';
         }
 
-        // حفظ السلة في localStorage
+        // ==================== حفظ السلة في localStorage ====================
         function saveCart() {
-            localStorage.setItem('cart', JSON.stringify(cart));
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                localStorage.setItem('cart_last_updated', new Date().toISOString());
+            } catch (error) {
+                console.error('خطأ في حفظ السلة:', error);
+                // استراتيجية بديلة
+                sessionStorage.setItem('cart_fallback', JSON.stringify(cart));
+            }
         }
 
-        // إظهار إشعار
+        // ==================== إظهار إشعار ====================
         function showNotification(title, message) {
             notificationTitle.textContent = title;
             notificationMessage.textContent = message;
@@ -2953,7 +3010,7 @@
             }, 3500);
         }
 
-        // إعداد صفحة الدفع
+        // ==================== إعداد صفحة الدفع ====================
         function setupCheckout() {
             // تحديث عناصر صفحة الدفع
             checkoutItemsContainer.innerHTML = '';
@@ -2988,89 +3045,115 @@
             checkoutTotal.textContent = total.toFixed(2) + ' ريال';
         }
 
-        // إرسال الطلب إلى واتساب
+        // ==================== إرسال الطلب إلى واتساب ====================
         function submitOrderForm(e) {
             e.preventDefault();
+            e.stopPropagation();
             
-            // التحقق من وجود منتجات في السلة
-            if (cart.length === 0) {
-                showNotification('سلة فارغة', 'يرجى إضافة منتجات إلى السلة أولاً');
-                return;
+            console.log('بدء إرسال الطلب...');
+            
+            // تعطيل الزر أثناء المعالجة
+            const submitBtn = e.target.querySelector('.submit-order') || submitOrder;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+            
+            try {
+                // التحقق من وجود منتجات في السلة
+                if (cart.length === 0) {
+                    showNotification('سلة فارغة', 'يرجى إضافة منتجات إلى السلة أولاً');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> تأكيد الطلب وإرسال عبر واتساب';
+                    return;
+                }
+                
+                // جمع بيانات النموذج
+                const address = document.getElementById('delivery-address').value.trim();
+                const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+                const notes = document.getElementById('order-notes').value.trim();
+                
+                // التحقق من العنوان
+                if (!address) {
+                    showNotification('عنوان مطلوب', 'يرجى إدخال عنوان الاستلام');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> تأكيد الطلب وإرسال عبر واتساب';
+                    return;
+                }
+                
+                // إنشاء رسالة الطلب
+                let message = `🛒 *طلب جديد - Global Store* 🛒\n\n`;
+                message += `📍 *عنوان الاستلام:* ${address}\n`;
+                message += `💳 *طريقة الدفع:* ${getPaymentMethodName(paymentMethod)}\n\n`;
+                message += `🛍️ *المنتجات:*\n`;
+                
+                let total = 0;
+                cart.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    message += `${index + 1}. ${item.name} (${item.quantity}) × ${item.price} = ${itemTotal.toFixed(2)} ريال\n`;
+                });
+                
+                message += `\n💰 *المجموع الكلي:* ${total.toFixed(2)} ريال\n`;
+                message += `📅 *التاريخ:* ${new Date().toLocaleString('ar-SA')}\n`;
+                
+                if (notes) {
+                    message += `\n📝 *ملاحظات:*\n${notes}\n`;
+                }
+                
+                message += `\nشكراً لطلبكم من Global Store! 🚀`;
+                
+                // حفظ الطلب مؤقتاً
+                localStorage.setItem('lastOrder', JSON.stringify({
+                    address: address,
+                    payment: paymentMethod,
+                    notes: notes,
+                    cart: cart,
+                    total: total,
+                    date: new Date().toLocaleString('ar-SA')
+                }));
+                
+                // رقم واتساب المتجر
+                const whatsappNumber = "+249112703344";
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+                
+                // إظهار رسالة تأكيد
+                showNotification('جارٍ تحويلك إلى واتساب', 'سيتم فتح تطبيق واتساب لإرسال تفاصيل طلبك');
+                
+                // إغلاق نافذة الدفع
+                closeCheckoutModal();
+                
+                // إغلاق سلة المشتريات
+                closeCartSidebar();
+                
+                // إفراغ السلة بعد إرسال الطلب
+                cart = [];
+                saveCart();
+                updateCartUI();
+                
+                // إعادة تعيين النموذج
+                checkoutForm.reset();
+                
+                // إعادة تمكين الزر بعد الانتهاء
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> تأكيد الطلب وإرسال عبر واتساب';
+                    
+                    // فتح واتساب بعد تأخير قصير
+                    window.open(whatsappURL, '_blank');
+                    showNotification('تم فتح واتساب', 'يرجى إرسال الرسالة إلى المتجر لتأكيد طلبك');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('خطأ في إرسال الطلب:', error);
+                showNotification('خطأ في الإرسال', 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.');
+                
+                // إعادة تمكين الزر
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> تأكيد الطلب وإرسال عبر واتساب';
             }
-            
-            // جمع بيانات النموذج
-            const address = document.getElementById('delivery-address').value.trim();
-            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-            const notes = document.getElementById('order-notes').value.trim();
-            
-            // التحقق من العنوان
-            if (!address) {
-                showNotification('عنوان مطلوب', 'يرجى إدخال عنوان الاستلام');
-                return;
-            }
-            
-            // إنشاء رسالة الطلب
-            let message = `🛒 *طلب جديد - Global Store* 🛒\n\n`;
-            message += `📍 *عنوان الاستلام:* ${address}\n`;
-            message += `💳 *طريقة الدفع:* ${getPaymentMethodName(paymentMethod)}\n\n`;
-            message += `🛍️ *المنتجات:*\n`;
-            
-            let total = 0;
-            cart.forEach((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                message += `${index + 1}. ${item.name} (${item.quantity}) × ${item.price} = ${itemTotal.toFixed(2)} ريال\n`;
-            });
-            
-            message += `\n💰 *المجموع الكلي:* ${total.toFixed(2)} ريال\n`;
-            message += `📅 *التاريخ:* ${new Date().toLocaleString('ar-SA')}\n`;
-            
-            if (notes) {
-                message += `\n📝 *ملاحظات:*\n${notes}\n`;
-            }
-            
-            message += `\nشكراً لطلبكم من Global Store! 🚀`;
-            
-            // حفظ الطلب مؤقتاً
-            localStorage.setItem('lastOrder', JSON.stringify({
-                address: address,
-                payment: paymentMethod,
-                notes: notes,
-                cart: cart,
-                total: total,
-                date: new Date().toLocaleString('ar-SA')
-            }));
-            
-            // رقم واتساب المتجر
-            const whatsappNumber = "+249112703344";
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-            
-            // إظهار رسالة تأكيد
-            showNotification('جارٍ تحويلك إلى واتساب', 'سيتم فتح تطبيق واتساب لإرسال تفاصيل طلبك');
-            
-            // إغلاق نافذة الدفع
-            checkoutModal.classList.remove('active');
-            
-            // إغلاق سلة المشتريات
-            cartSidebar.classList.remove('active');
-            
-            // إفراغ السلة بعد إرسال الطلب
-            cart = [];
-            saveCart();
-            updateCartUI();
-            
-            // إعادة تعيين النموذج
-            checkoutForm.reset();
-            
-            // فتح واتساب بعد تأخير قصير
-            setTimeout(() => {
-                window.open(whatsappURL, '_blank');
-                showNotification('تم فتح واتساب', 'يرجى إرسال الرسالة إلى المتجر لتأكيد طلبك');
-            }, 1500);
         }
 
-        // الحصول على اسم طريقة الدفع
+        // ==================== الحصول على اسم طريقة الدفع ====================
         function getPaymentMethodName(method) {
             switch (method) {
                 case 'cash': return 'كاش (الدفع عند الاستلام)';
@@ -3082,10 +3165,27 @@
             }
         }
 
-        // تهيئة التطبيق
+        // ==================== تحميل البيانات بشكل متدرج ====================
+        async function loadData() {
+            try {
+                // تحميل الفئات أولاً
+                initCategories();
+                
+                // ثم تحميل المنتجات
+                setTimeout(() => {
+                    renderOffers();
+                    updateCartUI();
+                }, 100);
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                showNotification('خطأ في التحميل', 'حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة.');
+            }
+        }
+
+        // ==================== تهيئة التطبيق ====================
         function init() {
-            initCategories();
-            updateCartUI();
+            // بدء تحميل البيانات
+            loadData();
             
             // زر العودة للأعلى
             backToTop.addEventListener('click', () => {
@@ -3106,27 +3206,18 @@
                 cartSidebar.classList.add('active');
             });
             
-            closeCart.addEventListener('click', () => {
-                cartSidebar.classList.remove('active');
-            });
+            closeCart.addEventListener('click', closeCartSidebar);
             
-            continueShopping.addEventListener('click', () => {
-                cartSidebar.classList.remove('active');
-            });
+            continueShopping.addEventListener('click', closeCartSidebar);
             
-            checkoutBtn.addEventListener('click', () => {
-                if (cart.length === 0) {
-                    showNotification('السلة فارغة', 'يرجى إضافة منتجات إلى السلة أولاً');
-                    return;
-                }
-                
-                setupCheckout();
-                checkoutModal.classList.add('active');
-            });
+            // زر إتمام الطلب - تم إصلاحه
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', handleCheckout);
+            } else {
+                console.error('زر إتمام الطلب غير موجود!');
+            }
             
-            closeCheckout.addEventListener('click', () => {
-                checkoutModal.classList.remove('active');
-            });
+            closeCheckout.addEventListener('click', closeCheckoutModal);
             
             checkoutForm.addEventListener('submit', submitOrderForm);
             
@@ -3143,12 +3234,14 @@
             document.addEventListener('click', (e) => {
                 // إغلاق سلة المشتريات عند النقر خارجها
                 if (!cartSidebar.contains(e.target) && !cartIcon.contains(e.target) && cartSidebar.classList.contains('active')) {
-                    cartSidebar.classList.remove('active');
+                    closeCartSidebar();
                 }
                 
                 // إغلاق نافذة الدفع عند النقر خارجها
-                if (!checkoutModal.contains(e.target) && checkoutModal.classList.contains('active')) {
-                    checkoutModal.classList.remove('active');
+                if (checkoutModal.classList.contains('active') && 
+                    !checkoutModal.querySelector('.checkout-content').contains(e.target) &&
+                    !checkoutBtn.contains(e.target)) {
+                    closeCheckoutModal();
                 }
             });
             
@@ -3158,8 +3251,34 @@
             }, 1000);
         }
 
-        // بدء تشغيل التطبيق
-        document.addEventListener('DOMContentLoaded', init);
+        // ==================== بدء تشغيل التطبيق ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('الصفحة تم تحميلها بالكامل');
+            
+            // التحقق من وجود جميع العناصر المهمة
+            const importantElements = ['checkout-btn', 'submit-order', 'checkout-form', 'cart-sidebar'];
+            importantElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    console.error(`العنصر #${id} غير موجود في الصفحة!`);
+                }
+            });
+            
+            // معالجة الأخطاء العامة
+            window.addEventListener('error', function(e) {
+                console.error('حدث خطأ:', e.message, 'في', e.filename, 'سطر', e.lineno);
+                showNotification('خطأ في النظام', 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.');
+            });
+            
+            // تهيئة التطبيق
+            try {
+                init();
+                console.log('التطبيق تم تهيئته بنجاح');
+            } catch (error) {
+                console.error('فشل تهيئة التطبيق:', error);
+                showNotification('خطأ في التهيئة', 'يوجد مشكلة في تحميل المتجر. يرجى تحديث الصفحة.');
+            }
+        });
     </script>
 </body>
 </html>
