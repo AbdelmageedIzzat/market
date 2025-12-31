@@ -425,3 +425,189 @@
         text-align: center;
     }
 }
+/* تحسين حجم الأيقونات للهواتف */
+
+/* الهواتف المتوسطة */
+@media (max-width: 768px) {
+    /* تصغير أيقونات المنتجات */
+    .product-image,
+    .offer-image {
+        font-size: var(--icon-xl) !important;
+    }
+    
+    .cart-item-image {
+        font-size: var(--icon-lg) !important;
+    }
+    
+    /* تصغير أيقونات الأزرار */
+    .add-to-cart-btn i,
+    .quantity-btn i,
+    .remove-item i {
+        font-size: 0.9rem !important;
+    }
+    
+    /* تصغير أيقونات العناوين */
+    .section-title i,
+    .offers-title i {
+        font-size: 1.2rem !important;
+    }
+    
+    /* تصغير أيقونات السلة */
+    .cart-title i,
+    .cart-item-category i {
+        font-size: 1rem !important;
+    }
+    
+    /* تصغير أيقونات الدفع */
+    .checkout-title i,
+    .payment-icon {
+        font-size: 1.2rem !important;
+    }
+    
+    /* تصغير أيقونات النموذج */
+    .form-label i,
+    .security-tip i,
+    .security-notice i {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* الهواتف الصغيرة */
+@media (max-width: 576px) {
+    /* تصغير أكثر للأيقونات */
+    .product-image,
+    .offer-image {
+        font-size: var(--icon-lg) !important;
+    }
+    
+    .cart-item-image {
+        font-size: var(--icon-base) !important;
+    }
+    
+    /* أيقونات الأزرار */
+    .add-to-cart-btn i,
+    .quantity-btn i,
+    .remove-item i {
+        font-size: 0.8rem !important;
+    }
+    
+    /* أيقونات العناوين */
+    .section-title i,
+    .offers-title i {
+        font-size: 1rem !important;
+    }
+    
+    /* أيقونات الإشعارات */
+    .notification-icon {
+        font-size: 1.2rem !important;
+    }
+    
+    /* أيقونات التذييل */
+    .footer-info i,
+    .social-link i {
+        font-size: 0.9rem !important;
+    }
+    
+    /* أيقونات الشروط */
+    .security-badge i {
+        font-size: 1rem !important;
+    }
+}
+
+/* الهواتف الصغيرة جداً */
+@media (max-width: 480px) {
+    /* تصغير متطرف */
+    .product-image,
+    .offer-image {
+        font-size: 1.5rem !important;
+    }
+    
+    .cart-item-image {
+        font-size: 1.2rem !important;
+    }
+    
+    /* أزرار السلة */
+    .cart-item-quantity .quantity-btn {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    .cart-item-quantity .quantity-btn i {
+        font-size: 0.7rem !important;
+    }
+    
+    .remove-item {
+        width: 26px !important;
+        height: 26px !important;
+    }
+    
+    .remove-item i {
+        font-size: 0.8rem !important;
+    }
+    
+    /* أيقونات النموذج */
+    .form-label i {
+        font-size: 0.8rem !important;
+    }
+    
+    /* أيقونة زر الدفع */
+    .checkout-btn i,
+    .submit-order i {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* الشاشات الصغيرة جداً */
+@media (max-width: 375px) {
+    /* أصغر حجم ممكن */
+    .product-image,
+    .offer-image {
+        font-size: 1.3rem !important;
+    }
+    
+    .cart-item-image {
+        font-size: 1rem !important;
+    }
+    
+    /* أيقونات الفئات */
+    .category-btn i {
+        font-size: 0.9rem !important;
+    }
+    
+    /* أيقونات السلة */
+    .cart-icon i {
+        font-size: 1.1rem !important;
+    }
+    
+    /* أيقونات الإشعار */
+    .notification-icon {
+        font-size: 1rem !important;
+    }
+    
+    /* أيقونة العودة للأعلى */
+    .back-to-top i {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* تحسين خاص لمشكلة الأيقونات الكبيرة */
+@media (max-width: 768px) {
+    /* إصلاح أيقونات المنتجات الكبيرة */
+    .product-image span,
+    .offer-image span,
+    .cart-item-image span {
+        font-size: inherit !important;
+        line-height: 1 !important;
+    }
+    
+    /* منع تكبير الخط */
+    * {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+    
+    /* تحسين الأيقونات في عناصر محددة */
+    i.fas, i.fab {
+        font-size: inherit !important;
+    }
+}
