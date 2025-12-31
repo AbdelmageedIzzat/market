@@ -529,3 +529,32 @@
         min-width: 180px;
     }
 }
+/* أضف هذا في نهاية ملف responsive.css */
+
+/* تحسينات لنافذة تأكيد واتساب في الموبايل */
+@media (max-width: 768px) {
+    .whatsapp-confirmation-modal > div {
+        max-width: 90%;
+        padding: 20px;
+    }
+    
+    .whatsapp-confirmation-modal button {
+        font-size: var(--font-sm) !important;
+        padding: 12px !important;
+    }
+}
+
+/* تحسين لوحة المفاتيح في الموبايل */
+@media (max-width: 576px) {
+    input, textarea, select {
+        font-size: 16px !important; /* منع التكبير التلقائي في iOS */
+    }
+    
+    .checkout-content {
+        max-height: 85vh;
+    }
+    
+    .checkout-body {
+        padding: 15px;
+    }
+}
