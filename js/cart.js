@@ -69,6 +69,9 @@ class CartManager {
         if (window.uiManager) {
             window.uiManager.pulseCartIcon();
         }
+        
+        // إبقاء السلة مفتوحة
+        this.keepCartOpen();
     }
     
     // تحديث واجهة السلة
@@ -181,6 +184,9 @@ class CartManager {
             this.saveCart();
             this.updateCartUI();
             this.updateProductUI(productId);
+            
+            // إبقاء السلة مفتوحة
+            this.keepCartOpen();
         }
     }
     
@@ -194,6 +200,16 @@ class CartManager {
             this.updateCartUI();
             this.updateProductUI(productId);
             window.uiManager?.showNotification('تمت الإزالة', 'تمت إزالة المنتج من السلة');
+            
+            // إبقاء السلة مفتوحة
+            this.keepCartOpen();
+        }
+    }
+    
+    // إبقاء السلة مفتوحة عند التعديل
+    keepCartOpen() {
+        if (window.uiManager) {
+            window.uiManager.openCartSidebar();
         }
     }
     
