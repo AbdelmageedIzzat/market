@@ -315,19 +315,4 @@ class CartManager {
 
 // تهيئة مدير السلة
 window.cartManager = new CartManager();
-// إضافة هذا الكود في نهاية الدالة init() في cart.js
-init() {
-    this.updateCartUI();
-    console.log('CartManager: تم التهيئة');
-    
-    // إضافة مستمع حدث يدوي لفتح السلة (كدعم إضافي)
-    const cartIcon = document.getElementById('cart-icon');
-    if (cartIcon) {
-        cartIcon.addEventListener('click', () => {
-            console.log('CartManager: تم النقر على السلة من cart.js');
-            if (window.uiManager) {
-                window.uiManager.openCartSidebar();
-            }
-        });
-    }
-}
+
