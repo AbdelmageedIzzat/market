@@ -79,6 +79,11 @@ class App {
             // تهيئة طرق الدفع
             window.productsManager?.initPaymentMethods();
             
+            // تهيئة نظام البحث
+            if (window.searchManager) {
+                console.log('تم تهيئة نظام البحث');
+            }
+            
             // عرض صفحة العروض
             window.productsManager?.renderOffers();
             
@@ -103,6 +108,11 @@ class App {
         
         // تهيئة نظام الدفع
         if (window.checkoutManager) {
+            // تمت التهيئة في constructor
+        }
+        
+        // تهيئة نظام البحث
+        if (window.searchManager) {
             // تمت التهيئة في constructor
         }
     }
