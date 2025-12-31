@@ -82,6 +82,7 @@
             font-weight: 700;
             color: white;
             text-decoration: none;
+            cursor: pointer;
         }
 
         .logo i {
@@ -105,6 +106,7 @@
 
         .cart-icon:hover {
             background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
         }
 
         .cart-count {
@@ -177,18 +179,24 @@
             align-items: center;
             gap: 8px;
             font-size: 1rem;
+            user-select: none;
         }
 
         .category-btn:hover {
             background-color: var(--primary-light);
             color: white;
             transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
         }
 
         .category-btn.active {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             box-shadow: var(--shadow-light);
+        }
+
+        .category-btn.active:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
         }
 
         .category-btn i {
@@ -378,6 +386,7 @@
             color: var(--dark);
             transition: var(--transition);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            user-select: none;
         }
 
         .quantity-btn:hover {
@@ -386,12 +395,17 @@
             transform: scale(1.1);
         }
 
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+
         .quantity {
             font-weight: 700;
             font-size: 1.1rem;
             min-width: 40px;
             text-align: center;
             color: var(--dark);
+            user-select: none;
         }
 
         .add-to-cart-btn {
@@ -408,11 +422,16 @@
             gap: 10px;
             font-size: 1rem;
             box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            user-select: none;
         }
 
         .add-to-cart-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(-1px);
         }
 
         .add-to-cart-btn.added {
@@ -476,6 +495,7 @@
 
         .close-cart:hover {
             background-color: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
         }
 
         .cart-items {
@@ -718,6 +738,7 @@
 
         .close-checkout:hover {
             background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
         }
 
         .checkout-body {
@@ -780,6 +801,8 @@
             position: absolute;
             opacity: 0;
             cursor: pointer;
+            height: 0;
+            width: 0;
         }
 
         .payment-label {
@@ -1293,7 +1316,7 @@
     <!-- الشريط العلوي -->
     <header class="header">
         <div class="header-content">
-            <a href="#" class="logo">
+            <a href="#" class="logo" id="home-logo">
                 <i class="fas fa-store"></i>
                 <span>متجر أونلاين</span>
             </a>
@@ -1684,25 +1707,4 @@
                     image: '🔗',
                     description: 'سلسلة فضية طويلة مع قلادة قلب',
                     badge: 'جديد'
-                },
-                {
-                    id: 'acc11',
-                    name: 'بروش زهور',
-                    price: 85,
-                    image: '🌸',
-                    description: 'بروش على شكل زهور بتصميم أنثوي رقيق',
-                    badge: null
-                },
-                {
-                    id: 'acc12',
-                    name: 'ساعة حائط فاخرة',
-                    price: 450,
-                    image: '🕰️',
-                    description: 'ساعة حائط بتصميم عصري وأنيق',
-                    badge: 'خصم'
-                }
-            ],
-            cosmetics: [
-                {
-                    id: 'cos1',
-                    name:
+            
