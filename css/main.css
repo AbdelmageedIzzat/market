@@ -1851,3 +1851,22 @@ button:active {
 .offer-info .stock-info i {
     color: var(--success);
 }
+/* أنماط نافذة التأكيد */
+.confirmation-modal {
+    animation: fadeIn 0.3s ease;
+}
+
+.confirmation-content {
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
