@@ -13,13 +13,20 @@ class UIManager {
         this.continueShopping = document.getElementById('continue-shopping');
         this.checkoutBtn = document.getElementById('checkout-btn');
         this.homeLogo = document.getElementById('home-logo');
+        
+        // إضافة متغيرات للبحث
+        this.searchContainer = null;
+        this.searchInput = null;
+        this.searchResults = null;
+        this.searchTimeout = null;
+        
         this.init();
     }
     
     init() {
         this.setupEventListeners();
         this.setupScrollHandler();
-        this.addAnimationStyles();
+        this.addSearchFunctionality();
     }
     
     setupEventListeners() {
@@ -104,66 +111,151 @@ class UIManager {
         });
     }
     
-    // إضافة أنماط CSS للحركات
-    addAnimationStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            /* تأثيرات الحركة */
-            @keyframes vibrate {
-                0%, 100% { transform: translateX(0) scale(1.1); }
-                25% { transform: translateX(-2px) scale(1.1); }
-                75% { transform: translateX(2px) scale(1.1); }
-            }
-            
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.1); }
-                100% { transform: scale(1); }
-            }
-            
-            @keyframes bounce {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-5px); }
-            }
-            
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
-            }
-            
-            /* تأثير عند إضافة منتج للسلة */
-            .add-to-cart-animation {
-                animation: pulse 0.5s ease, vibrate 0.3s ease;
-            }
-            
-            /* تأثير عند تحديث الكمية */
-            .quantity-update-animation {
-                animation: bounce 0.3s ease;
-            }
-            
-            /* تأثير عند حذف منتج */
-            .item-removing-animation {
-                animation: shake 0.3s ease;
-            }
-            
-            /* تأثير للمنتجات الجديدة */
-            .new-item-animation {
-                animation: fadeInUp 0.6s ease;
-            }
+    // إضافة وظيفة البحث
+    addSearchFunctionality() {
+        if (!document.querySelector('.header-actions')) return;
+        
+        // إنشاء عنصر البحث
+        this.searchContainer = document.createElement('div');
+        this.searchContainer.className = 'search-container';
+        this.searchContainer.innerHTML = `
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="product-search" placeholder="ابحث عن منتج...">
+                <button class="clear-search" id="clear-search" style="display:none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="search-results" id="search-results"></div>
         `;
-        document.head.appendChild(style);
+        
+        document.querySelector('.header-actions').prepend(this.searchContainer);
+        
+        // الحصول على العناصر
+        this.searchInput = document.getElementById('product-search');
+        this.searchResults = document.getElementById('search-results');
+        const clearBtn = document.getElementById('clear-search');
+        
+        if (!this.searchInput || !this.searchResults) return;
+        
+        // إعداد مستمعي الأحداث
+        this.searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.trim();
+            
+            // عرض/إخفاء زر المسح
+            if (clearBtn) {
+                clearBtn.style.display = term ? 'block' : 'none';
+            }
+            
+            // إلغاء البحث السابق
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
+            }
+            
+            // البحث بعد تأخير
+            if (term.length >= 2) {
+                this.searchTimeout = setTimeout(() => {
+                    this.performSearch(term);
+                }, 300);
+            } else {
+                this.hideSearchResults();
+            }
+        });
+        
+        // مسح البحث
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.searchInput.value = '';
+                clearBtn.style.display = 'none';
+                this.hideSearchResults();
+                this.searchInput.focus();
+            });
+        }
+        
+        // إغلاق النتائج عند النقر خارجها
+        document.addEventListener('click', (e) => {
+            if (!this.searchContainer.contains(e.target)) {
+                this.hideSearchResults();
+            }
+        });
+    }
+    
+    // تنفيذ البحث
+    performSearch(term) {
+        const results = window.productsManager?.searchProducts(term) || [];
+        this.displaySearchResults(results);
+    }
+    
+    // عرض نتائج البحث
+    displaySearchResults(results) {
+        if (!this.searchResults) return;
+        
+        if (results.length === 0) {
+            this.searchResults.innerHTML = `
+                <div class="search-result-item no-results">
+                    <i class="fas fa-search"></i>
+                    <span>لا توجد نتائج للبحث</span>
+                </div>
+            `;
+        } else {
+            this.searchResults.innerHTML = results.map(product => `
+                <div class="search-result-item" data-id="${product.id}" data-category="${product.category}">
+                    <div class="search-result-image">
+                        ${product.image}
+                    </div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">${product.name}</div>
+                        <div class="search-result-category">${product.categoryName}</div>
+                        <div class="search-result-price">${product.price} ريال</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // إضافة مستمعي الأحداث للنتائج
+            this.searchResults.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    const category = item.dataset.category;
+                    
+                    // الانتقال للفئة المناسبة
+                    window.productsManager?.switchCategory(category);
+                    
+                    // إخفاء نتائج البحث
+                    this.hideSearchResults();
+                    
+                    // مسح حقل البحث
+                    if (this.searchInput) {
+                        this.searchInput.value = '';
+                        const clearBtn = document.getElementById('clear-search');
+                        if (clearBtn) clearBtn.style.display = 'none';
+                    }
+                    
+                    // التمرير للمنتج
+                    setTimeout(() => {
+                        const productElement = document.querySelector(`.product-card [data-id="${id}"]`) ||
+                                              document.querySelector(`.offer-card [data-id="${id}"]`);
+                        if (productElement) {
+                            productElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            
+                            // إضافة تأثير للمنتج
+                            productElement.classList.add('pulse');
+                            setTimeout(() => {
+                                productElement.classList.remove('pulse');
+                            }, 1000);
+                        }
+                    }, 500);
+                });
+            });
+        }
+        
+        this.searchResults.classList.add('active');
+    }
+    
+    // إخفاء نتائج البحث
+    hideSearchResults() {
+        if (this.searchResults) {
+            this.searchResults.classList.remove('active');
+        }
     }
     
     // فتح سلة المشتريات
@@ -180,7 +272,7 @@ class UIManager {
         }
     }
     
-    // إظهار إشعار
+    // إظهار إشعار محسن
     showNotification(title, message, type = 'success') {
         if (!this.notification || !this.notificationTitle || !this.notificationMessage) return;
         
@@ -217,6 +309,10 @@ class UIManager {
         this.notification.classList.add('show');
         
         // إخفاء الإشعار تلقائياً بعد 2 ثانية
+        if (this.notificationTimeout) {
+            clearTimeout(this.notificationTimeout);
+        }
+        
         this.notificationTimeout = setTimeout(() => {
             this.hideNotification();
         }, 2000);
@@ -228,91 +324,19 @@ class UIManager {
             this.notification.classList.remove('show');
             if (this.notificationTimeout) {
                 clearTimeout(this.notificationTimeout);
+                this.notificationTimeout = null;
             }
         }
     }
     
-    // إضافة تأثير عند إضافة منتج للسلة - ✅ هذه الدالة المطلوبة
+    // إضافة تأثير عند إضافة منتج
     addToCartAnimation(element) {
         if (!element) return;
         
-        // إضافة تأثير النبض والاهتزاز
-        element.classList.add('add-to-cart-animation');
-        
-        // إضافة تأثير تغيير اللون المؤقت
-        const originalBackground = element.style.background;
-        const originalColor = element.style.color;
-        
-        if (element.classList.contains('added')) {
-            // إذا كان المنتج مضاف بالفعل (تحويل إلى إزالة)
-            element.style.background = 'linear-gradient(135deg, var(--danger) 0%, #c53030 100%)';
-            element.style.color = 'white';
-        } else {
-            // إذا كان إضافة جديدة
-            element.style.background = 'linear-gradient(135deg, var(--success) 0%, #0DA67A 100%)';
-            element.style.color = 'white';
-        }
-        
-        // إضافة تأثير التوسع
-        element.style.transform = 'scale(1.1)';
-        element.style.boxShadow = '0 6px 20px rgba(58, 54, 224, 0.4)';
-        
-        // إزالة التأثيرات بعد انتهاء الوقت
+        element.style.transform = 'scale(1.2)';
         setTimeout(() => {
-            element.classList.remove('add-to-cart-animation');
-            element.style.background = originalBackground;
-            element.style.color = originalColor;
-            element.style.transform = '';
-            element.style.boxShadow = '';
-        }, 500);
-    }
-    
-    // تأثير عند تحديث كمية منتج
-    updateQuantityAnimation(element) {
-        if (!element) return;
-        
-        element.classList.add('quantity-update-animation');
-        
-        setTimeout(() => {
-            element.classList.remove('quantity-update-animation');
+            element.style.transform = 'scale(1)';
         }, 300);
-    }
-    
-    // تأثير عند حذف منتج
-    removeItemAnimation(element) {
-        if (!element) return;
-        
-        element.classList.add('item-removing-animation');
-        
-        // تغيير اللون إلى الأحمر مؤقتاً
-        const originalBackground = element.style.background;
-        element.style.background = 'linear-gradient(135deg, var(--danger) 0%, #c53030 100%)';
-        element.style.color = 'white';
-        
-        setTimeout(() => {
-            element.classList.remove('item-removing-animation');
-            element.style.background = originalBackground;
-            element.style.color = '';
-        }, 300);
-    }
-    
-    // تأثير ظهور عنصر جديد
-    newItemAnimation(element) {
-        if (!element) return;
-        
-        element.classList.add('new-item-animation');
-        element.style.opacity = '0';
-        
-        // تأثير الظهور التدريجي
-        setTimeout(() => {
-            element.style.opacity = '1';
-            element.style.transition = 'opacity 0.6s ease';
-        }, 10);
-        
-        setTimeout(() => {
-            element.classList.remove('new-item-animation');
-            element.style.transition = '';
-        }, 600);
     }
     
     // تحميل مؤقت
@@ -331,13 +355,9 @@ class UIManager {
                 color: var(--primary);
                 z-index: 9999;
                 background: rgba(255, 255, 255, 0.9);
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+                padding: 20px;
+                border-radius: var(--radius);
+                box-shadow: var(--shadow-dark);
             `;
             document.body.appendChild(loader);
         } else {
@@ -356,8 +376,6 @@ class UIManager {
         
         if (quantityElement) {
             quantityElement.textContent = quantity;
-            // إضافة تأثير على العدد
-            this.updateQuantityAnimation(quantityElement);
         }
         
         if (addButton) {
@@ -366,8 +384,6 @@ class UIManager {
                 addButton.innerHTML = '<i class="fas fa-check"></i> مضاف';
                 if (quantityControl) {
                     quantityControl.style.display = 'flex';
-                    // إضافة تأثير لعنصر التحكم بالكمية
-                    this.newItemAnimation(quantityControl);
                 }
             } else {
                 addButton.classList.remove('added');
@@ -377,31 +393,15 @@ class UIManager {
                 }
             }
             
-            // إضافة تأثير للزر
+            // إضافة تأثير
             this.addToCartAnimation(addButton);
-        }
-    }
-    
-    // تأثير على زر السلة عند إضافة منتج
-    animateCartIcon() {
-        if (this.cartIcon) {
-            // تأثير الاهتزاز
-            this.cartIcon.style.animation = 'bounce 0.5s ease';
-            
-            // تأثير التوسع المؤقت
-            this.cartIcon.style.transform = 'scale(1.2)';
-            
-            setTimeout(() => {
-                this.cartIcon.style.animation = '';
-                this.cartIcon.style.transform = '';
-            }, 500);
         }
     }
     
     // عرض رسالة ترحيب
     showWelcomeMessage() {
         setTimeout(() => {
-            this.showNotification('مرحباً بك في Global Store!', 'تصفح عروضنا الحصرية وأضف ما تريد إلى سلة المشتريات');
+            this.showNotification('مرحباً بك في Global Store!', 'تصفح عروضنا الحصرية وأضف ما تريد إلى سلة المشتريات', 'info');
         }, 1000);
     }
 }
