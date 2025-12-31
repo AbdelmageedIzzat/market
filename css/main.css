@@ -1973,3 +1973,76 @@
     50% { box-shadow: 0 0 0 10px rgba(58, 54, 224, 0.3); }
     100% { box-shadow: 0 0 0 0 var(--primary); }
 }
+/* إصلاحات السلة */
+.cart-icon {
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+.cart-icon:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* تحسين ظهور السلة */
+.cart-sidebar.active {
+    left: 0 !important;
+    animation: slideIn 0.3s ease-out !important;
+}
+
+/* التأكد من أن السلة فوق كل شيء */
+.cart-sidebar {
+    z-index: 1100 !important;
+}
+
+/* Overlay للسلة */
+.cart-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1099;
+    display: none;
+}
+
+.cart-overlay.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* تأثيرات الحركة */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* التأكد من أن زر السلة قابل للنقر */
+#cart-icon {
+    pointer-events: auto !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
+
+/* إصلاح للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .cart-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
