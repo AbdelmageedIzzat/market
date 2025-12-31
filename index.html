@@ -1,0 +1,1204 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر الواتساب - طلبات سريعة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* التنسيقات العامة */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #25D366;
+            --secondary: #128C7E;
+            --dark: #075E54;
+            --light: #DCF8C6;
+            --text: #333;
+            --text-light: #666;
+            --background: #f8f9fa;
+            --card-bg: #fff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .container {
+            padding: 20px 0;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            color: var(--primary);
+            font-size: 2.5rem;
+        }
+        
+        .logo h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+        }
+        
+        .tagline {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-title i {
+            color: var(--primary);
+        }
+        
+        /* تنسيقات التنقل بين الأقسام */
+        .steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .step {
+            padding: 12px 24px;
+            background-color: #fff;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .step.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .step.completed {
+            background-color: var(--light);
+            color: var(--dark);
+            border-color: var(--secondary);
+        }
+        
+        .step:hover:not(.active) {
+            background-color: #f0f0f0;
+        }
+        
+        /* تنسيقات أقسام المحتوى */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* تنسيقات المنتجات */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        .product-image {
+            height: 180px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 3rem;
+            position: relative;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--light);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+        
+        .quantity-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .quantity {
+            font-weight: 600;
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .add-to-cart {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-to-cart:hover {
+            background-color: var(--secondary);
+        }
+        
+        .add-to-cart.added {
+            background-color: var(--dark);
+        }
+        
+        /* تنسيقات سلة المشتريات */
+        .cart-items {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            color: var(--text-light);
+            font-size: 1.8rem;
+        }
+        
+        .cart-item-info {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+        
+        .cart-item-price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cart-item-total {
+            font-weight: 700;
+            font-size: 1.3rem;
+            min-width: 100px;
+            text-align: left;
+            color: var(--dark);
+        }
+        
+        .remove-item {
+            background-color: #ffebee;
+            color: #d32f2f;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .remove-item:hover {
+            background-color: #ffcdd2;
+        }
+        
+        .cart-summary {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .summary-row.total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            border-bottom: none;
+            padding-top: 15px;
+            border-top: 2px solid var(--primary);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        
+        .empty-cart i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        /* تنسيقات نموذج البيانات */
+        .form-container {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-note {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+        
+        /* تنسيقات الأزرار */
+        .btn {
+            padding: 16px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .btn-next {
+            margin-top: 20px;
+        }
+        
+        .btn-back {
+            background-color: #f0f0f0;
+            color: var(--text);
+            margin-left: 15px;
+        }
+        
+        .btn-back:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        /* تنسيقات الواتساب */
+        .whatsapp-message-preview {
+            background-color: var(--light);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 30px;
+            border-right: 5px solid var(--primary);
+            white-space: pre-line;
+            font-family: monospace;
+            line-height: 1.8;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .whatsapp-logo {
+            color: var(--primary);
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        /* تنسيقات متجاوبة */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            
+            .step {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .cart-item-image {
+                margin-left: 0;
+            }
+            
+            .cart-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn-back {
+                margin-left: 0;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .step {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* إشعارات */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fab fa-whatsapp"></i>
+                <h1>متجر الواتساب</h1>
+            </div>
+            <p class="tagline">اطلب بسهولة .. استلم بسرعة</p>
+        </header>
+        
+        <div class="steps">
+            <div class="step active" data-step="products">
+                <i class="fas fa-store"></i>
+                <span>المنتجات</span>
+            </div>
+            <div class="step" data-step="cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span>سلة المشتريات</span>
+            </div>
+            <div class="step" data-step="checkout">
+                <i class="fas fa-user-check"></i>
+                <span>معلومات العميل</span>
+            </div>
+            <div class="step" data-step="whatsapp">
+                <i class="fab fa-whatsapp"></i>
+                <span>إرسال الطلب</span>
+            </div>
+        </div>
+        
+        <!-- قسم المنتجات -->
+        <section id="products" class="section active">
+            <h2 class="page-title"><i class="fas fa-store"></i> منتجاتنا</h2>
+            <div class="products-grid" id="products-container">
+                <!-- سيتم إضافة المنتجات ديناميكياً -->
+            </div>
+            <div class="buttons-container">
+                <button class="btn btn-primary btn-next" id="next-to-cart">
+                    الانتقال إلى السلة
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </section>
+        
+        <!-- قسم سلة المشتريات -->
+        <section id="cart" class="section">
+            <h2 class="page-title"><i class="fas fa-shopping-cart"></i> سلة المشتريات</h2>
+            
+            <div class="cart-items" id="cart-items-container">
+                <!-- سيتم عرض المنتجات المضافة هنا -->
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>المجموع الجزئي</span>
+                    <span id="subtotal">0.00 ريال</span>
+                </div>
+                <div class="summary-row total">
+                    <span>المجموع الكلي</span>
+                    <span id="total">0.00 ريال</span>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <button class="btn btn-back" id="back-to-products">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للمنتجات
+                </button>
+                <button class="btn btn-primary" id="next-to-checkout">
+                    المتابعة للطلب
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </section>
+        
+        <!-- قسم معلومات العميل -->
+        <section id="checkout" class="section">
+            <h2 class="page-title"><i class="fas fa-user-check"></i> معلومات العميل</h2>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label class="form-label" for="whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        رقم الواتساب
+                    </label>
+                    <input type="tel" id="whatsapp" class="form-input" placeholder="مثال: 966500000000" required>
+                    <p class="form-note">يرجى إدخال رقم الواتساب الخاص بك مع مفتاح الدولة</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        عنوان الاستلام
+                    </label>
+                    <textarea id="address" class="form-input form-textarea" placeholder="يرجى كتابة العنوان بالتفصيل" required></textarea>
+                    <p class="form-note">يمكنك أيضًا إرسال رابط الموقع من خرائط جوجل</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="notes">
+                        <i class="fas fa-sticky-note"></i>
+                        ملاحظات إضافية (اختياري)
+                    </label>
+                    <textarea id="notes" class="form-input form-textarea" placeholder="أي ملاحظات إضافية حول الطلب"></textarea>
+                </div>
+                
+                <div class="buttons-container">
+                    <button class="btn btn-back" id="back-to-cart">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة للسلة
+                    </button>
+                    <button class="btn btn-primary" id="next-to-whatsapp">
+                        عرض الطلب على واتساب
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- قسم واتساب -->
+        <section id="whatsapp" class="section">
+            <h2 class="page-title"><i class="fab fa-whatsapp"></i> إرسال الطلب عبر واتساب</h2>
+            
+            <div class="form-container">
+                <div class="whatsapp-logo">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                
+                <p>يرجى مراجعة تفاصيل طلبك أدناه، ثم اضغط على زر الإرسال لفتح واتساب مع تفاصيل الطلب.</p>
+                
+                <div class="whatsapp-message-preview" id="whatsapp-message">
+                    <!-- سيتم عرض رسالة الواتساب هنا -->
+                </div>
+                
+                <div class="buttons-container">
+                    <button class="btn btn-back" id="back-to-checkout">
+                        <i class="fas fa-arrow-right"></i>
+                        تعديل المعلومات
+                    </button>
+                    <button class="btn btn-primary" id="send-to-whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        فتح واتساب للإرسال
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- منطقة الإشعارات -->
+    <div id="notification-area"></div>
+
+    <script>
+        // بيانات المنتجات
+        const products = [
+            {
+                id: 1,
+                name: "قهوة عربية",
+                price: 15,
+                image: "☕",
+                description: "قهوة عربية أصيلة مع هيل"
+            },
+            {
+                id: 2,
+                name: "شاي بالنعناع",
+                price: 10,
+                image: "🍵",
+                description: "شاي أخضر مع نعناع طازج"
+            },
+            {
+                id: 3,
+                name: "كعكة الشوكولاتة",
+                price: 25,
+                image: "🍰",
+                description: "كعكة شوكولاتة لذيذة"
+            },
+            {
+                id: 4,
+                name: "ساندويتش دجاج",
+                price: 20,
+                image: "🥪",
+                description: "ساندويتش دجاج مشوي مع الخضار"
+            },
+            {
+                id: 5,
+                name: "عصير برتقال طازج",
+                price: 12,
+                image: "🍊",
+                description: "عصير برتقال طازج 100%"
+            },
+            {
+                id: 6,
+                name: "سلطة فواكه",
+                price: 18,
+                image: "🍓",
+                description: "سلطة فواكه طازجة ومختارة"
+            },
+            {
+                id: 7,
+                name: "بيتزا صغيرة",
+                price: 30,
+                image: "🍕",
+                description: "بيتزا صغيرة مع الجبن والصلصة"
+            },
+            {
+                id: 8,
+                name: "آيس كريم فانيليا",
+                price: 12,
+                image: "🍦",
+                description: "آيس كريم فانيليا كريمي"
+            }
+        ];
+
+        // سلة المشتريات (سيتم تخزينها في localStorage)
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // عناصر DOM
+        const sections = {
+            products: document.getElementById('products'),
+            cart: document.getElementById('cart'),
+            checkout: document.getElementById('checkout'),
+            whatsapp: document.getElementById('whatsapp')
+        };
+
+        const steps = document.querySelectorAll('.step');
+        const productsContainer = document.getElementById('products-container');
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const subtotalElement = document.getElementById('subtotal');
+        const totalElement = document.getElementById('total');
+        const whatsappMessageElement = document.getElementById('whatsapp-message');
+        const notificationArea = document.getElementById('notification-area');
+
+        // أزرار التنقل
+        document.getElementById('next-to-cart').addEventListener('click', () => showSection('cart'));
+        document.getElementById('back-to-products').addEventListener('click', () => showSection('products'));
+        document.getElementById('next-to-checkout').addEventListener('click', () => {
+            if (cart.length === 0) {
+                showNotification('يرجى إضافة منتجات إلى السلة أولاً', 'warning');
+                return;
+            }
+            showSection('checkout');
+        });
+        document.getElementById('back-to-cart').addEventListener('click', () => showSection('cart'));
+        document.getElementById('next-to-whatsapp').addEventListener('click', () => {
+            const whatsapp = document.getElementById('whatsapp').value.trim();
+            const address = document.getElementById('address').value.trim();
+            
+            if (!whatsapp || !address) {
+                showNotification('يرجى ملء جميع الحقول المطلوبة', 'warning');
+                return;
+            }
+            
+            generateWhatsAppMessage();
+            showSection('whatsapp');
+        });
+        document.getElementById('back-to-checkout').addEventListener('click', () => showSection('checkout'));
+        document.getElementById('send-to-whatsapp').addEventListener('click', sendToWhatsApp);
+
+        // عرض المنتجات
+        function renderProducts() {
+            productsContainer.innerHTML = '';
+            
+            products.forEach(product => {
+                const cartItem = cart.find(item => item.id === product.id);
+                const quantity = cartItem ? cartItem.quantity : 0;
+                
+                const productElement = document.createElement('div');
+                productElement.className = 'product-card';
+                productElement.innerHTML = `
+                    <div class="product-image">
+                        ${product.image}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-price">${product.price} ريال</div>
+                        <div class="product-actions">
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus" data-id="${product.id}">-</button>
+                                <span class="quantity" id="quantity-${product.id}">${quantity}</span>
+                                <button class="quantity-btn plus" data-id="${product.id}">+</button>
+                            </div>
+                            <button class="add-to-cart ${quantity > 0 ? 'added' : ''}" data-id="${product.id}">
+                                <i class="fas fa-${quantity > 0 ? 'check' : 'cart-plus'}"></i>
+                                ${quantity > 0 ? 'مضاف' : 'أضف للسلة'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                productsContainer.appendChild(productElement);
+            });
+            
+            // إضافة مستمعي الأحداث للأزرار
+            document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.quantity-btn').dataset.id);
+                    addToCart(id, 1);
+                });
+            });
+            
+            document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.quantity-btn').dataset.id);
+                    updateCartItemQuantity(id, -1);
+                });
+            });
+            
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.add-to-cart').dataset.id);
+                    const cartItem = cart.find(item => item.id === id);
+                    
+                    if (cartItem) {
+                        // إذا المنتج موجود بالفعل، قم بإزالته
+                        removeFromCart(id);
+                    } else {
+                        // إذا المنتج غير موجود، أضفه
+                        addToCart(id, 1);
+                    }
+                });
+            });
+        }
+
+        // إضافة منتج إلى السلة
+        function addToCart(productId, quantity) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity,
+                    image: product.image
+                });
+            }
+            
+            saveCart();
+            renderProducts();
+            renderCart();
+            showNotification('تمت إضافة المنتج إلى السلة', 'success');
+        }
+
+        // تحديث كمية منتج في السلة
+        function updateCartItemQuantity(productId, change) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            
+            if (itemIndex !== -1) {
+                cart[itemIndex].quantity += change;
+                
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                    showNotification('تمت إزالة المنتج من السلة', 'info');
+                }
+                
+                saveCart();
+                renderProducts();
+                renderCart();
+            }
+        }
+
+        // إزالة منتج من السلة
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            saveCart();
+            renderProducts();
+            renderCart();
+            showNotification('تمت إزالة المنتج من السلة', 'info');
+        }
+
+        // عرض محتويات السلة
+        function renderCart() {
+            cartItemsContainer.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>سلة المشتريات فارغة</h3>
+                        <p>لم تقم بإضافة أي منتجات بعد. ابدأ بالتسوق الآن!</p>
+                    </div>
+                `;
+                subtotalElement.textContent = '0.00 ريال';
+                totalElement.textContent = '0.00 ريال';
+                return;
+            }
+            
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                const cartItemElement = document.createElement('div');
+                cartItemElement.className = 'cart-item';
+                cartItemElement.innerHTML = `
+                    <div class="cart-item-image">
+                        ${item.image}
+                    </div>
+                    <div class="cart-item-info">
+                        <h4 class="cart-item-name">${item.name}</h4>
+                        <p class="cart-item-price">${item.price} ريال</p>
+                    </div>
+                    <div class="cart-item-actions">
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                        </div>
+                        <div class="cart-item-total">${itemTotal.toFixed(2)} ريال</div>
+                        <button class="remove-item" data-id="${item.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                cartItemsContainer.appendChild(cartItemElement);
+            });
+            
+            // تحديث الإجماليات
+            subtotalElement.textContent = subtotal.toFixed(2) + ' ريال';
+            totalElement.textContent = subtotal.toFixed(2) + ' ريال';
+            
+            // إضافة مستمعي الأحداث لأزرار السلة
+            document.querySelectorAll('.cart-item .quantity-btn.plus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.quantity-btn').dataset.id);
+                    updateCartItemQuantity(id, 1);
+                });
+            });
+            
+            document.querySelectorAll('.cart-item .quantity-btn.minus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.quantity-btn').dataset.id);
+                    updateCartItemQuantity(id, -1);
+                });
+            });
+            
+            document.querySelectorAll('.remove-item').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.closest('.remove-item').dataset.id);
+                    removeFromCart(id);
+                });
+            });
+        }
+
+        // توليد رسالة واتساب
+        function generateWhatsAppMessage() {
+            const whatsapp = document.getElementById('whatsapp').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+            
+            let message = `🔔 *طلب جديد* 🔔\n\n`;
+            message += `📱 *رقم الواتساب:* ${whatsapp}\n`;
+            message += `📍 *عنوان الاستلام:* ${address}\n\n`;
+            message += `🛒 *المنتجات المطلوبة:*\n`;
+            message += `-----------------------\n`;
+            
+            let total = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                message += `- ${item.name} (${item.quantity}) × ${item.price} ريال = ${itemTotal.toFixed(2)} ريال\n`;
+            });
+            
+            message += `-----------------------\n`;
+            message += `💰 *المجموع الكلي:* ${total.toFixed(2)} ريال\n\n`;
+            
+            if (notes) {
+                message += `📝 *ملاحظات إضافية:*\n${notes}\n\n`;
+            }
+            
+            message += `⏰ *وقت الطلب:* ${new Date().toLocaleString('ar-SA')}\n`;
+            message += `شكرًا لطلبكم! 🚀`;
+            
+            whatsappMessageElement.textContent = message;
+            
+            // تخزين رسالة الواتساب مؤقتًا
+            localStorage.setItem('whatsappMessage', message);
+        }
+
+        // إرسال الطلب عبر واتساب
+        function sendToWhatsApp() {
+            const whatsapp = document.getElementById('whatsapp').value.trim();
+            const message = localStorage.getItem('whatsappMessage');
+            
+            if (!whatsapp || !message) {
+                showNotification('يرجى ملء جميع الحقول أولاً', 'warning');
+                return;
+            }
+            
+            // تنظيف رقم الهاتف من أي أحرف غير رقمية
+            const cleanPhone = whatsapp.replace(/\D/g, '');
+            
+            // إنشاء رابط واتساب
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappURL = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+            
+            // فتح واتساب في نافذة جديدة
+            window.open(whatsappURL, '_blank');
+            
+            // إظهار إشعار
+            showNotification('جارٍ فتح واتساب... يرجى إرسال الرسالة', 'success');
+            
+            // إفراغ السلة بعد الإرسال
+            setTimeout(() => {
+                cart = [];
+                saveCart();
+                renderProducts();
+                renderCart();
+                document.getElementById('whatsapp').value = '';
+                document.getElementById('address').value = '';
+                document.getElementById('notes').value = '';
+                showSection('products');
+            }, 3000);
+        }
+
+        // حفظ السلة في localStorage
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // عرض قسم معين وإخفاء الآخرين
+        function showSection(sectionId) {
+            // تحديث الخطوات
+            steps.forEach(step => {
+                if (step.dataset.step === sectionId) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                    
+                    // وضع علامة "مكتمل" على الخطوات السابقة
+                    const stepOrder = ['products', 'cart', 'checkout', 'whatsapp'];
+                    const currentIndex = stepOrder.indexOf(sectionId);
+                    const stepIndex = stepOrder.indexOf(step.dataset.step);
+                    
+                    if (stepIndex < currentIndex) {
+                        step.classList.add('completed');
+                    } else {
+                        step.classList.remove('completed');
+                    }
+                }
+            });
+            
+            // إظهار/إخفاء الأقسام
+            Object.keys(sections).forEach(key => {
+                if (key === sectionId) {
+                    sections[key].classList.add('active');
+                } else {
+                    sections[key].classList.remove('active');
+                }
+            });
+            
+            // إذا كان القسم هو السلة، قم بتحديثها
+            if (sectionId === 'cart') {
+                renderCart();
+            }
+            
+            // إذا كان القسم هو واتساب، قم بتوليد الرسالة
+            if (sectionId === 'whatsapp') {
+                generateWhatsAppMessage();
+            }
+        }
+
+        // إظهار إشعار للمستخدم
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'warning') icon = 'exclamation-circle';
+            if (type === 'error') icon = 'times-circle';
+            
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // إزالة الإشعار بعد 3 ثوان
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // تهيئة التطبيق
+        function init() {
+            renderProducts();
+            renderCart();
+            
+            // تحميل البيانات المحفوظة إذا وجدت
+            const savedWhatsapp = localStorage.getItem('whatsapp');
+            const savedAddress = localStorage.getItem('address');
+            
+            if (savedWhatsapp) document.getElementById('whatsapp').value = savedWhatsapp;
+            if (savedAddress) document.getElementById('address').value = savedAddress;
+            
+            // حفظ البيانات عند التغيير
+            document.getElementById('whatsapp').addEventListener('input', (e) => {
+                localStorage.setItem('whatsapp', e.target.value);
+            });
+            
+            document.getElementById('address').addEventListener('input', (e) => {
+                localStorage.setItem('address', e.target.value);
+            });
+            
+            showNotification('مرحباً بك في متجر الواتساب! ابدأ بإضافة المنتجات إلى سلة التسوق', 'success');
+        }
+
+        // بدء تشغيل التطبيق
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
