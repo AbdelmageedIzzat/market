@@ -102,6 +102,17 @@ class CheckoutManager {
         });
         
         this.checkoutTotal.textContent = total.toFixed(2) + ' ريال';
+        
+        // إزالة خانة الموافقة على الشروط إذا كانت موجودة
+        this.removeTermsCheckbox();
+    }
+    
+    // إزالة خانة الموافقة على الشروط
+    removeTermsCheckbox() {
+        const termsAgreement = document.querySelector('.terms-agreement');
+        if (termsAgreement) {
+            termsAgreement.remove();
+        }
     }
     
     // إرسال الطلب
@@ -140,14 +151,6 @@ class CheckoutManager {
                 throw new Error('العنوان قصير جداً');
             }
             
-            // التحقق من الشروط
-            const termsCheckbox = document.getElementById('terms-agree');
-            if (termsCheckbox && !termsCheckbox.checked) {
-                window.uiManager?.showNotification('موافقة مطلوبة', 
-                    'يرجى الموافقة على الشروط والأحكام');
-                throw new Error('الموافقة على الشروط مطلوبة');
-            }
-            
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
             
             // إنشاء رسالة الطلب
@@ -157,27 +160,11 @@ class CheckoutManager {
             // حفظ الطلب مؤقتاً
             this.saveOrderToLocalStorage(address, paymentMethod, notes);
             
-            // إظهار رسالة تأكيد
-            window.uiManager?.showNotification('جارٍ تحويلك إلى واتساب', 
-                'سيتم فتح تطبيق واتساب لإرسال تفاصيل طلبك');
-            
-            // إغلاق النوافذ
+            // إغلاق نافذة الدفع
             this.closeCheckoutModal();
-            document.getElementById('cart-sidebar')?.classList.remove('active');
             
-            // إفراغ السلة
-            window.cartManager.clearCart();
-            
-            // إعادة تعيين النموذج
-            this.checkoutForm.reset();
-            
-            // فتح واتساب بعد تأخير قصير
-            setTimeout(() => {
-                console.log('محاولة فتح واتساب...');
-                this.openWhatsApp(message);
-                window.uiManager?.showNotification('تم فتح واتساب', 
-                    'يرجى إرسال الرسالة إلى المتجر لتأكيد طلبك');
-            }, 1000);
+            // إظهار نافذة التأكيد النهائية
+            this.showFinalConfirmation(address, paymentMethod, notes, message);
             
         } catch (error) {
             console.error('خطأ في إرسال الطلب:', error);
@@ -190,32 +177,201 @@ class CheckoutManager {
         }
     }
     
-    // إنشاء رسالة الطلب
+    // عرض نافذة التأكيد النهائية
+    showFinalConfirmation(address, paymentMethod, notes, message) {
+        const cartItems = window.cartManager.getAllItems();
+        const total = window.cartManager.getTotal();
+        const paymentMethodName = this.getPaymentMethodName(paymentMethod);
+        
+        // إنشاء نافذة التأكيد النهائية
+        const confirmationModal = document.createElement('div');
+        confirmationModal.className = 'final-confirmation-modal';
+        confirmationModal.id = 'final-confirmation-modal';
+        
+        confirmationModal.innerHTML = `
+            <div class="final-confirmation-content">
+                <div class="confirmation-header">
+                    <h3><i class="fas fa-check-circle"></i> تأكيد الطلب النهائي</h3>
+                </div>
+                
+                <div class="confirmation-body">
+                    <div class="order-details-confirm">
+                        <div class="order-detail-item">
+                            <span>العنوان:</span>
+                            <span>${address}</span>
+                        </div>
+                        <div class="order-detail-item">
+                            <span>طريقة الدفع:</span>
+                            <span>${paymentMethodName}</span>
+                        </div>
+                        <hr style="margin: 15px 0; border-color: var(--gray);">
+                        
+                        ${cartItems.map(item => `
+                            <div class="order-detail-item">
+                                <span>${item.name} × ${item.quantity}</span>
+                                <span>${(item.price * item.quantity).toFixed(2)} ريال</span>
+                            </div>
+                        `).join('')}
+                        
+                        <hr style="margin: 15px 0; border-color: var(--gray);">
+                        <div class="order-detail-item" style="font-weight: bold;">
+                            <span>المجموع الكلي:</span>
+                            <span>${total.toFixed(2)} ريال</span>
+                        </div>
+                        
+                        ${notes ? `
+                        <div class="order-detail-item">
+                            <span>ملاحظات:</span>
+                            <span>${notes}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="whatsapp-notice">
+                        <i class="fab fa-whatsapp"></i>
+                        <p>⚠️ الرجاء التأكد من صحة المعلومات قبل الإرسال</p>
+                    </div>
+                    
+                    <div class="final-warning">
+                        <p><strong>سيتم إرسال هذا الطلب عبر الواتساب إلى البائع للتجهيز</strong></p>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">يرجى التأكيد للمرة الأخيرة قبل الإرسال</p>
+                    </div>
+                </div>
+                
+                <div class="confirmation-footer">
+                    <button class="send-whatsapp-btn" onclick="window.checkoutManager.sendToWhatsApp('${this.escapeString(message)}')">
+                        <i class="fab fa-whatsapp"></i> تأكيد وإرسال بالواتساب
+                    </button>
+                    <button class="edit-order-btn" onclick="window.checkoutManager.editOrder()">
+                        تعديل الطلب
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // إضافة النافذة إلى الصفحة
+        document.body.appendChild(confirmationModal);
+        
+        // إظهار النافذة مع تأثير
+        setTimeout(() => {
+            confirmationModal.classList.add('active');
+        }, 50);
+        
+        // منع التمرير عند فتح النافذة
+        document.body.classList.add('modal-open');
+    }
+    
+    // تهريب النص للتضمين
+    escapeString(str) {
+        return str.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+    }
+    
+    // تعديل الطلب
+    editOrder() {
+        const confirmationModal = document.getElementById('final-confirmation-modal');
+        if (confirmationModal) {
+            confirmationModal.classList.remove('active');
+            setTimeout(() => {
+                confirmationModal.remove();
+                document.body.classList.remove('modal-open');
+                
+                // إعادة فتح نافذة الدفع
+                this.openCheckoutModal();
+            }, 300);
+        }
+    }
+    
+    // إرسال إلى واتساب
+    sendToWhatsApp(message) {
+        try {
+            // فك التهريب
+            const decodedMessage = message.replace(/\\'/g, "'").replace(/\\n/g, '\n');
+            
+            // رقم واتساب المتجر
+            const whatsappNumber = "+249112703344";
+            
+            // تنظيف الرقم من الأحرف غير الرقمية
+            const cleanNumber = whatsappNumber.replace(/\D/g, '');
+            
+            // ترميز الرسالة بشكل صحيح
+            const encodedMessage = encodeURIComponent(decodedMessage);
+            
+            // رابط واتساب
+            const whatsappURL = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
+            
+            console.log('رابط واتساب:', whatsappURL);
+            
+            // إغلاق نافذة التأكيد
+            const confirmationModal = document.getElementById('final-confirmation-modal');
+            if (confirmationModal) {
+                confirmationModal.classList.remove('active');
+                setTimeout(() => {
+                    confirmationModal.remove();
+                    document.body.classList.remove('modal-open');
+                }, 300);
+            }
+            
+            // إغلاق السلة
+            document.getElementById('cart-sidebar')?.classList.remove('active');
+            
+            // إفراغ السلة
+            window.cartManager.clearCart();
+            
+            // إعادة تعيين النموذج
+            this.checkoutForm?.reset();
+            
+            // إظهار رسالة نجاح
+            window.uiManager?.showNotification('نجاح', 'تم إرسال الطلب بنجاح! سيتم التواصل معك قريباً.', 'success');
+            
+            // فتح واتساب في نافذة جديدة
+            setTimeout(() => {
+                window.open(whatsappURL, '_blank');
+            }, 500);
+            
+        } catch (error) {
+            console.error('خطأ في إرسال واتساب:', error);
+            window.uiManager?.showNotification('خطأ', 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
+        }
+    }
+    
+    // إنشاء رسالة الطلب مع تنسيق محسن
     createOrderMessage(address, paymentMethod, notes) {
         const cartItems = window.cartManager.getAllItems();
         let total = 0;
         
-        let message = `🛒 *طلب جديد - Global Store* 🛒\n\n`;
-        message += `📍 *عنوان الاستلام:* ${address}\n`;
-        message += `💳 *طريقة الدفع:* ${this.getPaymentMethodName(paymentMethod)}\n\n`;
+        let message = `🛒 *طلب جديد - Global Store* 🛒\n`;
+        message += `══════════════════\n\n`;
+        
+        message += `📋 *معلومات الطلب:*\n`;
+        message += `📍 العنوان: ${address}\n`;
+        message += `💳 طريقة الدفع: ${this.getPaymentMethodName(paymentMethod)}\n`;
+        message += `📅 التاريخ: ${new Date().toLocaleString('ar-SA')}\n\n`;
+        
         message += `🛍️ *المنتجات:*\n`;
+        message += `══════════════════\n`;
         
         cartItems.forEach((item, index) => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            message += `${index + 1}. ${item.name} (${item.quantity}) × ${item.price} = ${itemTotal.toFixed(2)} ريال\n`;
+            message += `\n${index + 1}. ${item.name}\n`;
+            message += `   الكمية: ${item.quantity}\n`;
+            message += `   السعر: ${item.price.toFixed(2)} × ${item.quantity} = ${itemTotal.toFixed(2)} ريال\n`;
+            message += `══════════════════\n`;
         });
         
-        message += `\n💰 *المجموع الكلي:* ${total.toFixed(2)} ريال\n`;
-        message += `📅 *التاريخ:* ${new Date().toLocaleString('ar-SA')}\n`;
+        message += `\n💰 *الإجماليات:*\n`;
+        message += `══════════════════\n`;
+        message += `المجموع الكلي: ${total.toFixed(2)} ريال\n\n`;
         
         if (notes) {
-            message += `\n📝 *ملاحظات:*\n${notes}\n`;
+            message += `📝 *ملاحظات العميل:*\n`;
+            message += `${notes}\n\n`;
         }
         
-        message += `\nشكراً لطلبكم من Global Store! 🚀`;
+        message += `شكراً لطلبكم من Global Store! 🚀\n`;
+        message += `سيتم التواصل معكم قريباً لتأكيد الطلب.`;
         
-        console.log('رسالة الطلب:', message);
+        console.log('رسالة الطلب المحسنة:', message);
         return message;
     }
     
@@ -262,71 +418,6 @@ class CheckoutManager {
         localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
         
         console.log('تم حفظ الطلب في localStorage');
-    }
-    
-    // فتح واتساب
-    openWhatsApp(message) {
-        try {
-            // رقم واتساب المتجر
-            const whatsappNumber = "+249112703344";
-            
-            // تنظيف الرقم من الأحرف غير الرقمية
-            const cleanNumber = whatsappNumber.replace(/\D/g, '');
-            
-            // ترميز الرسالة بشكل صحيح
-            const encodedMessage = encodeURIComponent(message);
-            
-            // رابط واتساب
-            const whatsappURL = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
-            
-            console.log('رابط واتساب:', whatsappURL);
-            
-            // فتح في نافذة جديدة
-            window.open(whatsappURL, '_blank');
-            
-            // بديل: فتح في نفس النافذة
-            // window.location.href = whatsappURL;
-            
-        } catch (error) {
-            console.error('خطأ في فتح واتساب:', error);
-            
-            // بديل: نسخ الرسالة للتفريغ
-            this.copyOrderToClipboard(message);
-            
-            window.uiManager?.showNotification('خطأ في فتح واتساب', 
-                'تم نسخ الطلب. يمكنك لصقه في واتساب يدوياً', 'warning');
-        }
-    }
-    
-    // نسخ الطلب للحافظة (بديل)
-    copyOrderToClipboard(message) {
-        try {
-            navigator.clipboard.writeText(message).then(() => {
-                console.log('تم نسخ الطلب إلى الحافظة');
-                
-                // عرض تعليمات بديلة
-                const alertMessage = `تم نسخ تفاصيل طلبك.\n\n` +
-                                   `يمكنك الآن:\n` +
-                                   `1. فتح واتساب\n` +
-                                   `2. البحث عن الرقم: +249112703344\n` +
-                                   `3. لصق الرسالة وإرسالها\n\n` +
-                                   `الرسالة:\n${message}`;
-                
-                alert(alertMessage);
-            });
-        } catch (error) {
-            console.error('خطأ في النسخ:', error);
-            
-            // عرض الرسالة مباشرة
-            const textarea = document.createElement('textarea');
-            textarea.value = message;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            
-            alert(`تفاصيل طلبك:\n\n${message}\n\nيمكنك نسخها وإرسالها عبر واتساب.`);
-        }
     }
 }
 
