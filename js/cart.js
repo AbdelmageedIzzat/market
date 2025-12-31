@@ -8,11 +8,25 @@ class CartManager {
         this.cartTotal = document.getElementById('cart-total');
         this.cartCount = document.getElementById('cart-count');
         this.checkoutBtn = document.getElementById('checkout-btn');
+        
+        // تنظيف أي منتجات بكمية 0 عند التهيئة
+        this.cleanZeroQuantityItems();
         this.init();
     }
     
     init() {
         this.updateCartUI();
+    }
+    
+    // تنظيف المنتجات بكمية 0
+    cleanZeroQuantityItems() {
+        const initialLength = this.cart.length;
+        this.cart = this.cart.filter(item => item.quantity > 0);
+        
+        if (this.cart.length < initialLength) {
+            this.saveCart();
+            console.log('تم تنظيف المنتجات بكمية 0 من السلة');
+        }
     }
     
     // الحصول على عنصر من السلة
@@ -28,8 +42,8 @@ class CartManager {
         if (!category) {
             const found = window.productsManager?.getProductById(productId);
             if (found) {
-                product = found.product;
-                category = found.category;
+                product = found;
+                category = product.category;
             }
         } else {
             const categoryProducts = window.productsManager?.products[category] || [];
@@ -69,43 +83,112 @@ class CartManager {
         if (itemIndex !== -1) {
             this.cart[itemIndex].quantity += change;
             
+            // إذا أصبحت الكمية 0 أو أقل، احذف المنتج تماماً
             if (this.cart[itemIndex].quantity <= 0) {
+                // حفظ اسم المنتج للإشعار
+                const productName = this.cart[itemIndex].name;
+                
+                // إزالة المنتج من المصفوفة
                 this.cart.splice(itemIndex, 1);
-                window.uiManager?.showNotification('تمت الإزالة', 'تمت إزالة المنتج من سلة المشتريات');
+                
+                // إزالة العنصر من واجهة السلة
+                this.removeCartItemFromUI(productId);
+                
+                // إشعار للمستخدم
+                window.uiManager?.showNotification('تمت الإزالة', `تمت إزالة ${productName} من سلة المشتريات`);
+                
+                // إذا أصبحت السلة فارغة، أعد رسمها بالكامل
+                if (this.cart.length === 0) {
+                    setTimeout(() => {
+                        this.renderCart();
+                        this.updateCartTotals();
+                        this.updateCartCount();
+                        this.updateCheckoutButton();
+                    }, 300);
+                }
             } else {
-                // تحديث العنصر في السلة دون إغلاقها
+                // تحديث العنصر في السلة فقط
                 this.updateCartItemInUI(productId);
             }
             
             this.saveCart();
-            this.updateCartTotals();
-            this.updateCartCount();
             
-            // تحديث واجهة المنتج
+            // تحديث الإجماليات إذا لم يتم إعادة الرسم الكامل
+            if (this.cart.length > 0) {
+                this.updateCartTotals();
+                this.updateCartCount();
+                this.updateCheckoutButton();
+            }
+            
+            // تحديث واجهة المنتج في المتجر
             this.updateProductUI(productId);
         }
     }
     
     // إزالة منتج من السلة
     removeFromCart(productId) {
-        const initialLength = this.cart.length;
-        this.cart = this.cart.filter(item => item.id !== productId);
+        const itemIndex = this.cart.findIndex(item => item.id === productId);
         
-        if (this.cart.length < initialLength) {
+        if (itemIndex !== -1) {
+            // حفظ اسم المنتج للإشعار
+            const productName = this.cart[itemIndex].name;
+            
+            // إزالة المنتج من المصفوفة
+            this.cart.splice(itemIndex, 1);
+            
+            // إزالة العنصر من واجهة السلة
+            this.removeCartItemFromUI(productId);
+            
+            // حفظ التغييرات
             this.saveCart();
-            this.updateCartUI();
+            
+            // إذا أصبحت السلة فارغة، أعد رسمها
+            if (this.cart.length === 0) {
+                setTimeout(() => {
+                    this.renderCart();
+                    this.updateCartTotals();
+                    this.updateCartCount();
+                    this.updateCheckoutButton();
+                }, 300);
+            } else {
+                // تحديث الإجماليات فقط
+                this.updateCartTotals();
+                this.updateCartCount();
+                this.updateCheckoutButton();
+            }
+            
+            // تحديث واجهة المنتج في المتجر
             this.updateProductUI(productId);
-            window.uiManager?.showNotification('تمت الإزالة', 'تمت إزالة المنتج من سلة المشتريات');
+            
+            // إشعار للمستخدم
+            window.uiManager?.showNotification('تمت الإزالة', `تمت إزالة ${productName} من سلة المشتريات`);
         }
     }
     
-    // تحديث عنصر في السلة دون إعادة رسم الكل
+    // إزالة العنصر من واجهة السلة مع تأثير
+    removeCartItemFromUI(productId) {
+        const cartItemElement = this.cartItemsContainer?.querySelector(`.cart-item[data-id="${productId}"]`);
+        
+        if (cartItemElement) {
+            // إضافة تأثير اختفاء
+            cartItemElement.classList.add('removing');
+            
+            // إزالة العنصر بعد انتهاء التأثير
+            setTimeout(() => {
+                if (cartItemElement.parentNode) {
+                    cartItemElement.remove();
+                }
+            }, 300);
+        }
+    }
+    
+    // تحديث عنصر في واجهة السلة
     updateCartItemInUI(productId) {
         const cartItem = this.cart.find(item => item.id === productId);
         if (!cartItem || !this.cartItemsContainer) return;
         
-        // البحث عن العنصر في الواجهة وتحديثه فقط
         const cartItemElement = this.cartItemsContainer.querySelector(`.cart-item[data-id="${productId}"]`);
+        
         if (cartItemElement) {
             const quantityElement = cartItemElement.querySelector('.quantity');
             const totalElement = cartItemElement.querySelector('.cart-item-total');
@@ -118,10 +201,16 @@ class CartManager {
                 const itemTotal = cartItem.price * cartItem.quantity;
                 totalElement.textContent = `${itemTotal.toFixed(2)} ريال`;
             }
+            
+            // إضافة تأثير تحديث
+            cartItemElement.classList.add('updating');
+            setTimeout(() => {
+                cartItemElement.classList.remove('updating');
+            }, 300);
         }
     }
     
-    // تحديث واجهة المنتج
+    // تحديث واجهة المنتج في المتجر
     updateProductUI(productId, category = null) {
         const cartItem = this.getCartItem(productId);
         const quantity = cartItem ? cartItem.quantity : 0;
@@ -149,6 +238,9 @@ class CartManager {
                     quantityControl.style.display = 'none';
                 }
             }
+            
+            // إضافة تأثير
+            window.uiManager?.addToCartAnimation(addButton);
         }
     }
     
@@ -198,16 +290,16 @@ class CartManager {
                 </div>
                 <div class="cart-item-actions">
                     <div class="cart-item-quantity">
-                        <button class="quantity-btn minus" data-id="${item.id}">
+                        <button class="quantity-btn minus" data-id="${item.id}" title="تقليل الكمية">
                             <i class="fas fa-minus"></i>
                         </button>
                         <span class="quantity">${item.quantity}</span>
-                        <button class="quantity-btn plus" data-id="${item.id}">
+                        <button class="quantity-btn plus" data-id="${item.id}" title="زيادة الكمية">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
                     <div class="cart-item-total">${itemTotal.toFixed(2)} ريال</div>
-                    <button class="remove-item" data-id="${item.id}">
+                    <button class="remove-item" data-id="${item.id}" title="إزالة المنتج">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -223,7 +315,7 @@ class CartManager {
     // إضافة مستمعي الأحداث لعناصر السلة
     addCartEventListeners() {
         // أزرار زيادة الكمية في السلة
-        this.cartItemsContainer.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+        this.cartItemsContainer?.querySelectorAll('.quantity-btn.plus').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
                 this.updateCartItemQuantity(id, 1);
@@ -231,7 +323,7 @@ class CartManager {
         });
         
         // أزرار تقليل الكمية في السلة
-        this.cartItemsContainer.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+        this.cartItemsContainer?.querySelectorAll('.quantity-btn.minus').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
                 this.updateCartItemQuantity(id, -1);
@@ -239,7 +331,7 @@ class CartManager {
         });
         
         // أزرار إزالة المنتج من السلة
-        this.cartItemsContainer.querySelectorAll('.remove-item').forEach(btn => {
+        this.cartItemsContainer?.querySelectorAll('.remove-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.id;
                 this.removeFromCart(id);
