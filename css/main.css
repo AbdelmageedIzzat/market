@@ -1673,3 +1673,181 @@ button:active {
         padding: 20px;
     }
 }
+/* إضافة هذه الأنماط في نهاية ملف main.css */
+
+/* أنماط البحث */
+.search-container {
+    position: relative;
+    margin-left: 15px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    padding: 8px 15px;
+    min-width: 250px;
+    transition: var(--transition);
+}
+
+.search-box:focus-within {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.search-box i {
+    color: rgba(255, 255, 255, 0.7);
+    margin-left: 8px;
+}
+
+.search-box input {
+    background: none;
+    border: none;
+    color: white;
+    flex: 1;
+    font-family: 'Cairo', sans-serif;
+    font-size: var(--font-sm);
+    outline: none;
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.clear-search {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.clear-search:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-dark);
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--gray);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background-color: var(--light);
+}
+
+.search-result-image {
+    width: 40px;
+    height: 40px;
+    background-color: var(--gray);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    font-size: var(--icon-lg);
+    flex-shrink: 0;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-name {
+    font-weight: 600;
+    font-size: var(--font-sm);
+    margin-bottom: 4px;
+    color: var(--dark);
+}
+
+.search-result-category {
+    font-size: var(--font-xs);
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+
+.search-result-price {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: var(--font-sm);
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-light);
+    justify-content: center;
+    gap: 10px;
+}
+
+.no-results i {
+    font-size: var(--icon-base);
+    color: var(--gray);
+}
+
+/* أنماط إضافية للمنتجات */
+.product-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: var(--font-xs);
+    color: var(--text-light);
+}
+
+.stock-info, .rating-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stock-info i {
+    color: var(--success);
+}
+
+.rating-info i {
+    color: var(--warning);
+}
+
+.offer-info .stock-info {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-xs);
+    color: var(--text-light);
+}
+
+.offer-info .stock-info i {
+    color: var(--success);
+}
