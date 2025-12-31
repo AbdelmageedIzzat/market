@@ -20,30 +20,48 @@
     
     /* ألوان الحالة */
     --success: #10B981;
+    --success-light: #D1FAE5;
     --warning: #F59E0B;
+    --warning-light: #FEF3C7;
     --danger: #EF4444;
+    --danger-light: #FEE2E2;
     --info: #3B82F6;
+    --info-light: #DBEAFE;
+    
+    /* ألوان المستويات */
+    --bronze: #CD7F32;
+    --silver: #C0C0C0;
+    --gold: #FFD700;
+    --platinum: #E5E4E2;
     
     /* الظلال */
     --shadow: 0 10px 30px rgba(58, 54, 224, 0.12);
     --shadow-light: 0 5px 15px rgba(58, 54, 224, 0.08);
     --shadow-dark: 0 15px 40px rgba(0, 0, 0, 0.15);
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 20px 50px rgba(58, 54, 224, 0.15);
+    --shadow-xxl: 0 30px 60px rgba(0, 0, 0, 0.2);
     
     /* الزوايا */
     --radius: 16px;
     --radius-sm: 10px;
     --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-circle: 50%;
     
     /* التحولات */
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     --transition-fast: all 0.15s ease;
     --transition-slow: all 0.5s ease;
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    --transition-smooth: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     
     /* الأبعاد */
     --header-height: 75px;
     --sidebar-width: 380px;
     --max-width: 1400px;
+    --container-padding: 30px;
+    --mobile-padding: 15px;
     
     /* أحجام الخطوط */
     --font-xs: 0.75rem;     /* 12px */
@@ -122,26 +140,27 @@ h6 { font-size: var(--font-sm); }
 .en-font {
     font-family: 'Roboto', sans-serif;
 }
-/* إضافة هذه المتغيرات في نهاية ملف variables.css */
 
-/* إضافة ألوان جديدة */
---success-light: #D1FAE5;
---danger-light: #FEE2E2;
---warning-light: #FEF3C7;
---info-light: #DBEAFE;
+/* تحسينات للقارئ الشاشة */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
 
-/* إضافة ظلال جديدة */
---shadow-xl: 0 20px 50px rgba(58, 54, 224, 0.15);
---shadow-xxl: 0 30px 60px rgba(0, 0, 0, 0.2);
-
-/* إضافة أحجام جديدة */
---container-padding: 30px;
---mobile-padding: 15px;
-
-/* إضافة زوايا جديدة */
---radius-xl: 32px;
---radius-circle: 50%;
-
-/* إضافة تحولات جديدة */
---transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
---transition-smooth: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+/* للوضع الداكن */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --light: #1A1A2E;
+        --dark: #F8F9FF;
+        --gray: #2D2D44;
+        --text: #E4E6EF;
+        --text-light: #A0AEC0;
+    }
+}
