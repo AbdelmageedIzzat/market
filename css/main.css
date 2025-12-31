@@ -1475,3 +1475,159 @@
     color: rgba(255, 255, 255, 0.7);
     font-size: var(--font-xs);
 }
+/* تحسينات سلة التسوق */
+.cart-item-stock {
+    font-size: var(--font-xs);
+    color: var(--accent);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cart-item-stock i {
+    font-size: var(--icon-sm);
+}
+
+.cart-recommendation {
+    background: linear-gradient(135deg, rgba(58, 54, 224, 0.05) 0%, rgba(255, 107, 139, 0.05) 100%);
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    margin-top: 20px;
+    border: 1px dashed var(--primary);
+}
+
+.recommendation-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.recommendation-header i {
+    color: var(--warning);
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: var(--radius-sm);
+}
+
+.recommendation-image {
+    width: 50px;
+    height: 50px;
+    background: var(--gray);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--icon-lg);
+}
+
+.recommendation-info {
+    flex: 1;
+}
+
+.recommendation-info h5 {
+    font-size: var(--font-sm);
+    margin-bottom: 4px;
+    color: var(--dark);
+}
+
+.recommendation-price {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: var(--font-base);
+}
+
+.add-recommendation {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.add-recommendation:hover {
+    transform: scale(1.1);
+}
+
+/* ميزة السحب والإفلات (تجريبية) */
+.cart-item {
+    cursor: grab;
+    user-select: none;
+}
+
+.cart-item:active {
+    cursor: grabbing;
+}
+
+.cart-item.dragging {
+    opacity: 0.5;
+    transform: rotate(3deg);
+}
+
+/* زر التسوق من السلة الفارغة */
+.continue-shopping-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.continue-shopping-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(58, 54, 224, 0.3);
+}
+
+/* رسوم متحركة للسلة */
+@keyframes cartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.cart-pulse {
+    animation: cartPulse 0.5s ease;
+}
+
+/* مؤشر التحميل في السلة */
+.cart-loading {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.cart-loading::after {
+    content: '';
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--gray);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
