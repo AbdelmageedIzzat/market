@@ -96,6 +96,21 @@ class CheckoutManager {
         this.checkoutTotal.textContent = total.toFixed(2) + ' ريال';
     }
     
+    // التحقق من صحة النموذج
+    validateCheckoutForm(address, paymentMethod) {
+        const errors = [];
+        
+        if (!address || address.trim().length < 10) {
+            errors.push('يرجى إدخال عنوان تفصيلي (10 أحرف على الأقل)');
+        }
+        
+        if (!paymentMethod) {
+            errors.push('يرجى اختيار طريقة دفع');
+        }
+        
+        return errors;
+    }
+    
     // إرسال الطلب
     async submitOrderForm(e) {
         e.preventDefault();
@@ -117,10 +132,13 @@ class CheckoutManager {
             const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cash';
             const notes = document.getElementById('order-notes')?.value.trim() || '';
             
-            // التحقق من العنوان
-            if (!address) {
-                window.uiManager?.showNotification('عنوان مطلوب', 'يرجى إدخال عنوان الاستلام');
-                throw new Error('عنوان الاستلام مطلوب');
+            // التحقق من صحة البيانات
+            const validationErrors = this.validateCheckoutForm(address, paymentMethod);
+            if (validationErrors.length > 0) {
+                validationErrors.forEach(error => {
+                    window.uiManager?.showNotification('خطأ في الإدخال', error, 'error');
+                });
+                throw new Error('خطأ في التحقق من صحة البيانات');
             }
             
             // إنشاء رسالة الطلب
@@ -150,7 +168,7 @@ class CheckoutManager {
             
         } catch (error) {
             console.error('خطأ في إرسال الطلب:', error);
-            window.uiManager?.showNotification('خطأ في الإرسال', error.message || 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.');
+            window.uiManager?.showNotification('خطأ في الإرسال', error.message || 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.', 'error');
         } finally {
             // إعادة تمكين الزر
             submitBtn.disabled = false;
@@ -158,30 +176,39 @@ class CheckoutManager {
         }
     }
     
-    // إنشاء رسالة الطلب
+    // إنشاء رسالة الطلب (محسنة)
     createOrderMessage(address, paymentMethod, notes) {
         const cartItems = window.cartManager.getAllItems();
         let total = 0;
         
-        let message = `🛒 *طلب جديد - Global Store* 🛒\n\n`;
-        message += `📍 *عنوان الاستلام:* ${address}\n`;
-        message += `💳 *طريقة الدفع:* ${this.getPaymentMethodName(paymentMethod)}\n\n`;
+        let message = `🛒 *طلب جديد - Global Store* 🛒\n`;
+        message += `═══════════════════════════\n\n`;
+        message += `📋 *تفاصيل العميل:*\n`;
+        message += `📍 *العنوان:* ${address}\n`;
+        message += `💳 *طريقة الدفع:* ${this.getPaymentMethodName(paymentMethod)}\n`;
+        message += `📅 *التاريخ:* ${new Date().toLocaleString('ar-SA')}\n\n`;
+        
         message += `🛍️ *المنتجات:*\n`;
+        message += `═══════════════════════════\n`;
         
         cartItems.forEach((item, index) => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            message += `${index + 1}. ${item.name} (${item.quantity}) × ${item.price} = ${itemTotal.toFixed(2)} ريال\n`;
+            message += `${index + 1}. ${item.name}\n`;
+            message += `   الكمية: ${item.quantity}\n`;
+            message += `   السعر: ${item.price} × ${item.quantity} = ${itemTotal.toFixed(2)} ريال\n`;
+            message += `────────────────────\n`;
         });
         
-        message += `\n💰 *المجموع الكلي:* ${total.toFixed(2)} ريال\n`;
-        message += `📅 *التاريخ:* ${new Date().toLocaleString('ar-SA')}\n`;
+        message += `\n💰 *الإجمالي:* ${total.toFixed(2)} ريال\n\n`;
         
         if (notes) {
-            message += `\n📝 *ملاحظات:*\n${notes}\n`;
+            message += `📝 *ملاحظات إضافية:*\n`;
+            message += `${notes}\n\n`;
         }
         
-        message += `\nشكراً لطلبكم من Global Store! 🚀`;
+        message += `شكراً لطلبكم من Global Store! 🚀\n`;
+        message += `الرجاء إرسال هذا الطلب لتأكيده.`;
         
         return message;
     }
@@ -198,12 +225,14 @@ class CheckoutManager {
         const total = window.cartManager.getTotal();
         
         const order = {
+            id: 'order_' + Date.now(),
             address: address,
             payment: paymentMethod,
             notes: notes,
             cart: cartItems,
             total: total,
-            date: new Date().toLocaleString('ar-SA')
+            date: new Date().toISOString(),
+            status: 'pending'
         };
         
         localStorage.setItem('lastOrder', JSON.stringify(order));
@@ -211,6 +240,12 @@ class CheckoutManager {
         // حفظ تاريخ الطلب
         const orderHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
         orderHistory.push(order);
+        
+        // الاحتفاظ بآخر 50 طلب فقط
+        if (orderHistory.length > 50) {
+            orderHistory.shift();
+        }
+        
         localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
     }
     
