@@ -395,6 +395,88 @@
     .payment-icon {
         font-size: var(--icon-base);
     }
+    /* تحسينات خاصة للسلة في الهواتف */
+@media (max-width: 576px) {
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+        position: relative;
+    }
+    
+    .cart-item-image {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+        margin-left: 0;
+    }
+    
+    .cart-item-actions {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #ddd;
+    }
+    
+    .cart-item-quantity .quantity-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.875rem;
+    }
+    
+    .cart-item-quantity .quantity {
+        font-size: 1rem;
+        min-width: 35px;
+    }
+    
+    .remove-item {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+    
+    /* تحسين تأثيرات الحذف في الموبايل */
+    .cart-item.removing {
+        animation: mobileSlideOut 0.25s ease forwards;
+    }
+    
+    @keyframes mobileSlideOut {
+        0% {
+            opacity: 1;
+            transform: translateX(0);
+            height: auto;
+        }
+        100% {
+            opacity: 0;
+            transform: translateX(-30px);
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+    }
+}
+
+/* تحسين أداء اللمس */
+@media (hover: none) and (pointer: coarse) {
+    .cart-item {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .quantity-btn,
+    .remove-item {
+        touch-action: manipulation;
+    }
+    
+    /* منع تكبير النص عند النقر المزدوج */
+    .cart-item * {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+}
     
     .payment-name {
         font-size: var(--font-sm);
