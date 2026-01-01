@@ -1,4 +1,4 @@
-// إدارة عملية الدفع - نسخة مصححة
+// إدارة عملية الدفع - نسخة محسنة
 
 class CheckoutManager {
     constructor() {
@@ -103,7 +103,7 @@ class CheckoutManager {
         
         this.checkoutTotal.textContent = total.toFixed(2) + ' ريال';
         
-        // إزالة خانة الموافقة على الشروط إذا كانت موجودة
+        // إزالة خانة الموافقة على الشروط
         this.removeTermsCheckbox();
     }
     
