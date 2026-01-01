@@ -63,6 +63,12 @@
     --icon-xl: 2rem;        /* 32px */
     --icon-2xl: 2.5rem;     /* 40px */
     --icon-3xl: 3rem;       /* 48px */
+    
+    /* ألوان الأمان */
+    --security-success: #10B981;
+    --security-warning: #F59E0B;
+    --security-danger: #EF4444;
+    --security-info: #3B82F6;
 }
 
 /* إعادة تعيين */
@@ -122,14 +128,3 @@ h6 { font-size: var(--font-sm); }
 .en-font {
     font-family: 'Roboto', sans-serif;
 }
-/* ألوان الأمان */
---security-success: #10B981;
---security-warning: #F59E0B;
---security-danger: #EF4444;
---security-info: #3B82F6;
-
-/* ظلال الأمان */
---shadow-security: 0 0 0 3px rgba(16, 185, 129, 0.1);
-
-/* حدود الأمان */
---border-security: 2px solid var(--security-success);
