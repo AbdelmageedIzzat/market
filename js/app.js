@@ -1,76 +1,105 @@
-// js/app.js - التحديث الكامل
+// js/app.js
+[file content begin]
 class App {
     constructor() {
-        console.log('App: بدء تشغيل التطبيق...');
+        console.log('🚀 بدء تشغيل التطبيق...');
         this.init();
     }
     
     async init() {
         try {
+            // بدء عرض المنتجات فوراً (لا تنتظر Firebase)
+            this.showProductsImmediately();
+            
             // معالجة الأخطاء العامة
             this.setupErrorHandling();
             
             // التحقق من العناصر المهمة
             this.checkEssentialElements();
             
-            // انتظار تهيئة Firebase
-            await this.waitForFirebase();
-            
-            // تحميل البيانات
-            await this.loadData();
-            
-            // تهيئة المكونات
+            // تهيئة المكونات الأخرى
             this.initComponents();
             
-            // إظهار رسالة الترحيب
-            this.showWelcomeMessage();
+            // محاولة تحميل Firebase (في الخلفية)
+            this.initFirebaseInBackground();
             
-            console.log('App: التطبيق جاهز للاستخدام');
+            console.log('✅ التطبيق جاهز للاستخدام');
             
         } catch (error) {
-            console.error('App: خطأ في التهيئة:', error);
-            window.uiManager?.showNotification('خطأ في النظام', 'حدث خطأ في بدء التشغيل. يرجى تحديث الصفحة.', 'error');
+            console.error('❌ خطأ في التهيئة:', error);
+            
+            // مع ذلك، حاول عرض المنتجات
+            this.showProductsImmediately();
         }
     }
     
-    async waitForFirebase() {
-        console.log('App: انتظار تهيئة Firebase...');
+    // عرض المنتجات فوراً
+    showProductsImmediately() {
+        console.log('📦 عرض المنتجات فوراً...');
         
-        // انتظار قليل للتأكد من تحميل جميع الملفات
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // إذا كان هناك دالة initFirebase، استدعها
-        if (typeof window.initFirebase === 'function') {
-            await window.initFirebase();
+        if (window.productsManager) {
+            // عرض المنتجات مباشرة من البيانات المحلية
+            window.productsManager.startProducts();
+            
+            // تحديث واجهة السلة إذا كانت موجودة
+            if (window.cartManager) {
+                window.cartManager.updateCartUI();
+            }
+            
+            // إظهار رسالة ترحيب
+            setTimeout(() => {
+                if (window.uiManager) {
+                    window.uiManager.showNotification(
+                        'مرحباً بك في Global Store!', 
+                        'تصفح عروضنا الحصرية وأضف ما تريد إلى سلة المشتريات', 
+                        'info'
+                    );
+                }
+            }, 1000);
+        } else {
+            console.error('❌ productsManager غير متاح');
+            
+            // محاولة عرض المنتجات يدوياً
+            this.showProductsManually();
         }
+    }
+    
+    // عرض المنتجات يدوياً (إذا فشل productsManager)
+    showProductsManually() {
+        console.log('🛠️ عرض المنتجات يدوياً...');
         
-        console.log('App: اكتمال تهيئة Firebase');
+        try {
+            // عرض فئة العروض بشكل يدوي
+            const offersSection = document.getElementById('offers');
+            if (offersSection) {
+                offersSection.innerHTML = `
+                    <div class="offers-section">
+                        <h2>العروض الحالية</h2>
+                        <p>جاري تحميل المنتجات...</p>
+                        <div style="text-align: center; padding: 50px;">
+                            <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary);"></i>
+                            <p style="margin-top: 20px;">يرجى الانتظار جاري تحميل المتجر</p>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px;">
+                                إعادة تحميل الصفحة
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('❌ خطأ في العرض اليدوي:', error);
+        }
     }
     
     setupErrorHandling() {
         // معالجة أخطاء JavaScript
         window.addEventListener('error', (e) => {
-            console.error('حدث خطأ:', e.message, 'في', e.filename, 'سطر', e.lineno);
-            
-            // عرض إشعار للمستخدم إذا كانت الواجهة جاهزة
-            setTimeout(() => {
-                window.uiManager?.showNotification('خطأ في النظام', 'حدث خطأ غير متوقع. يرجى تحديث الصفحة.', 'error');
-            }, 100);
+            console.error('حدث خطأ:', e.message);
         });
         
         // معالجة الوعود المرفوضة
         window.addEventListener('unhandledrejection', (e) => {
             console.error('وعد مرفوض:', e.reason);
-            
-            // عرض إشعار للمستخدم إذا كانت الواجهة جاهزة
-            setTimeout(() => {
-                window.uiManager?.showNotification('خطأ في النظام', 'حدث خطأ أثناء المعالجة.', 'error');
-            }, 100);
-        });
-        
-        // حماية من الأخطاء أثناء تحميل الصفحة
-        window.addEventListener('load', () => {
-            console.log('App: تم تحميل الصفحة بالكامل');
         });
     }
     
@@ -86,212 +115,105 @@ class App {
             const element = document.getElementById(id);
             if (!element) {
                 missingElements.push(id);
-                console.error(`App: العنصر #${id} غير موجود في الصفحة!`);
+                console.warn(`⚠️ العنصر #${id} غير موجود`);
             }
         });
         
         if (missingElements.length > 0) {
-            console.warn('App: بعض العناصر المهمة مفقودة:', missingElements);
-            
-            // محاولة إصلاح بعض العناصر الشائعة
-            this.tryFixMissingElements();
-        }
-    }
-    
-    tryFixMissingElements() {
-        console.log('App: محاولة إصلاح العناصر المفقودة...');
-        
-        // محاولة إنشاء العناصر المفقودة ديناميكياً
-        if (!document.getElementById('categories')) {
-            console.log('App: إنشاء عنصر الفئات ديناميكياً');
-            const mainContent = document.querySelector('.main-content');
-            if (mainContent) {
-                const categoriesDiv = document.createElement('div');
-                categoriesDiv.id = 'categories';
-                mainContent.appendChild(categoriesDiv);
-            }
-        }
-    }
-    
-    async loadData() {
-        try {
-            // عرض مؤشر تحميل
-            if (window.uiManager) {
-                window.uiManager.showLoader(true);
-            }
-            
-            // انتظار قليل للتأكد من تهيئة productsManager
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            // تحميل المنتجات
-            if (window.productsManager && window.productsManager.loadProductsFromJSON) {
-                const loaded = await window.productsManager.loadProductsFromJSON();
-                console.log('App: نتيجة تحميل المنتجات:', loaded ? 'نجاح' : 'فشل');
-                
-                if (loaded) {
-                    // تهيئة الفئات
-                    if (window.productsManager.initCategories) {
-                        window.productsManager.initCategories();
-                    }
-                    
-                    // تهيئة طرق الدفع
-                    if (window.productsManager.initPaymentMethods) {
-                        window.productsManager.initPaymentMethods();
-                    }
-                    
-                    // عرض صفحة العروض
-                    if (window.productsManager.renderOffers) {
-                        window.productsManager.renderOffers();
-                    }
-                }
-            } else {
-                console.error('App: productsManager غير متاح');
-                throw new Error('نظام المنتجات غير متاح');
-            }
-            
-        } catch (error) {
-            console.error('App: خطأ في تحميل البيانات:', error);
-            
-            // محاولة عرض المنتجات بشكل يدوي
-            this.tryManualLoad();
-            
-            window.uiManager?.showNotification('تحميل جزئي', 'تم تحميل البيانات الأساسية فقط', 'warning');
-        } finally {
-            // إخفاء مؤشر التحميل
-            if (window.uiManager) {
-                setTimeout(() => {
-                    window.uiManager.showLoader(false);
-                }, 300);
-            }
-        }
-    }
-    
-    tryManualLoad() {
-        console.log('App: محاولة تحميل يدوي للبيانات...');
-        
-        try {
-            // محاولة تهيئة الفئات يدوياً
-            const categoriesContainer = document.getElementById('categories');
-            if (categoriesContainer && window.categories) {
-                categoriesContainer.innerHTML = window.categories.map(cat => `
-                    <button class="category-btn ${cat.id === 'offers' ? 'active' : ''}" 
-                            data-category="${cat.id}">
-                        <i class="fas fa-${cat.icon}"></i>
-                        ${cat.name}
-                    </button>
-                `).join('');
-            }
-            
-            // محاولة عرض منتجات العرض
-            const offersSection = document.getElementById('offers');
-            if (offersSection && backupProducts.offers) {
-                offersSection.innerHTML = `
-                    <div class="offers-section">
-                        <h2>العروض المتاحة</h2>
-                        <div class="offers-grid">
-                            ${backupProducts.offers.map(offer => `
-                                <div class="offer-card">
-                                    <div class="offer-image">${offer.image}</div>
-                                    <h3>${offer.name}</h3>
-                                    <p>${offer.price} ريال</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-        } catch (manualError) {
-            console.error('App: خطأ في التحميل اليدوي:', manualError);
+            console.warn('بعض العناصر المهمة مفقودة:', missingElements);
         }
     }
     
     initComponents() {
-        console.log('App: تهيئة المكونات...');
+        console.log('⚙️ تهيئة المكونات...');
         
-        // تهيئة السلة
-        if (!window.cartManager) {
-            console.log('App: تهيئة CartManager يدوياً');
-            window.cartManager = {
-                cart: JSON.parse(localStorage.getItem('cart')) || [],
-                updateCartUI: function() {
-                    const count = this.cart.reduce((sum, item) => sum + item.quantity, 0);
-                    const cartCount = document.getElementById('cart-count');
-                    if (cartCount) cartCount.textContent = count;
-                },
-                getItemCount: function() {
-                    return this.cart.reduce((sum, item) => sum + item.quantity, 0);
-                }
-            };
-            window.cartManager.updateCartUI();
+        // تهيئة CartManager إذا لم يكن موجوداً
+        if (!window.cartManager && window.CartManager) {
+            console.log('🛒 تهيئة CartManager');
+            window.cartManager = new CartManager();
         }
         
-        // تهيئة نظام الدفع
+        // تهيئة UIManager إذا لم يكن موجوداً
+        if (!window.uiManager && window.UIManager) {
+            console.log('🎨 تهيئة UIManager');
+            window.uiManager = new UIManager();
+        }
+        
+        // تهيئة CheckoutManager إذا لم يكن موجوداً
         if (!window.checkoutManager && window.CheckoutManager) {
-            console.log('App: تهيئة CheckoutManager');
+            console.log('💳 تهيئة CheckoutManager');
             window.checkoutManager = new CheckoutManager();
         }
         
-        // تهيئة نظام البحث
+        // تهيئة SearchManager إذا لم يكن موجوداً
         if (!window.searchManager && window.SearchManager) {
-            console.log('App: تهيئة SearchManager');
+            console.log('🔍 تهيئة SearchManager');
             window.searchManager = new SearchManager();
         }
+    }
+    
+    async initFirebaseInBackground() {
+        console.log('🔥 تهيئة Firebase في الخلفية...');
         
-        // تهيئة واجهة المستخدم
-        if (!window.uiManager && window.UIManager) {
-            console.log('App: تهيئة UIManager');
-            window.uiManager = new UIManager();
-        }
-    }
-    
-    showWelcomeMessage() {
-        setTimeout(() => {
-            if (window.uiManager && window.uiManager.showNotification) {
-                window.uiManager.showNotification(
-                    'مرحباً بك في Global Store!', 
-                    'تصفح عروضنا الحصرية وأضف ما تريد إلى سلة المشتريات', 
-                    'info'
-                );
+        try {
+            // انتظار تحميل Firebase
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // إذا كان Firebase متاحاً، حاول تحميل المنتجات منه
+            if (window.db && window.productsManager && window.productsManager.loadProductsFromJSON) {
+                console.log('🔄 محاولة تحديث المنتجات من Firebase...');
+                
+                // تحميل من Firebase (قد يستبدل البيانات المحلية)
+                await window.productsManager.loadProductsFromJSON();
+                
+                // تحديث العرض إذا نجح
+                const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
+                window.productsManager.switchCategory(activeCategory);
+                
+                console.log('✅ تم تحديث المنتجات من Firebase (إن وجدت)');
             }
-        }, 1000);
-    }
-    
-    // دالة مساعدة للتحميل الآمن
-    safeLoadScript(src) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.body.appendChild(script);
-        });
+        } catch (error) {
+            console.log('ℹ️ Firebase غير متاح أو به مشكلة، نستخدم البيانات المحلية');
+        }
     }
 }
 
 // بدء تشغيل التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    // تأخير بسيط للتأكد من تحميل جميع الموارد
+    // تأخير بسيط للتأكد من تحميل المكتبات الأساسية
     setTimeout(() => {
         try {
             new App();
         } catch (error) {
-            console.error('خطأ فادح في بدء التطبيق:', error);
-            alert('حدث خطأ في تحميل التطبيق. يرجى تحديث الصفحة.');
+            console.error('💥 خطأ فادح في بدء التطبيق:', error);
+            
+            // محاولة أخيرة لعرض شيء للمستخدم
+            const offersSection = document.getElementById('offers');
+            if (offersSection) {
+                offersSection.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h2>Global Store</h2>
+                        <p>متجر عالمي للتسوق الإلكتروني</p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3A36E0; color: white; border: none; border-radius: 8px;">
+                            إعادة تحميل المتجر
+                        </button>
+                    </div>
+                `;
+            }
         }
     }, 100);
 });
 
-// تصدير فئة التطبيق للاستخدام العام
+// جعل التطبيق متاحاً للتصحيح
 window.App = App;
 
-// دالة للمساعدة في التصحيح
-window.debugApp = function() {
-    console.log('=== حالة التطبيق ===');
-    console.log('productsManager:', !!window.productsManager);
-    console.log('cartManager:', !!window.cartManager);
-    console.log('uiManager:', !!window.uiManager);
-    console.log('db:', !!window.db);
-    console.log('auth:', !!window.auth);
-    console.log('localStorage cart:', localStorage.getItem('cart'));
+// دالة مساعدة للتصحيح
+window.debugStore = function() {
+    console.log('=== تصحيح المتجر ===');
+    console.log('productsManager:', window.productsManager ? '✅ موجود' : '❌ غير موجود');
+    console.log('cartManager:', window.cartManager ? '✅ موجود' : '❌ غير موجود');
+    console.log('uiManager:', window.uiManager ? '✅ موجود' : '❌ غير موجود');
+    console.log('عدد المنتجات:', window.productsManager ? Object.values(window.productsManager.products).flat().length : 'غير معروف');
     console.log('==================');
 };
+[file content end]
