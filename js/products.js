@@ -1,4 +1,4 @@
-[file name]: products.js
+// js/products.js
 [file content begin]
 // بيانات الفئات والمنتجات
 
@@ -12,18 +12,8 @@ const categories = [
     { id: 'home', name: 'أدوات منزلية', icon: 'home', color: '#6A66FF' }
 ];
 
-// بيانات المنتجات (سيتم تحميلها من Firebase أو استخدام البيانات المحلية)
+// بيانات المنتجات الاحتياطية (البيانات الأصلية)
 const products = {
-    offers: [],
-    accessories: [],
-    cosmetics: [],
-    clothing: [],
-    electronics: [],
-    home: []
-};
-
-// بيانات المنتجات الاحتياطية (إذا لم يتم تحميلها من Firebase)
-const backupProducts = {
     offers: [
         {
             id: 'offer1',
@@ -413,110 +403,102 @@ const paymentMethods = [
         icon: 'money-check'
     }
 ];
-// js/products.js (تحديث دالة loadProductsFromJSON فقط)
 
 // دالة لتحميل المنتجات من Firebase أو استخدام البيانات المحلية
 async function loadProductsFromJSON() {
-    console.log('تحميل المنتجات: بدء العملية...');
-    
-    // مؤشر تحميل
-    if (window.uiManager) {
-        window.uiManager.showLoader(true);
-    }
+    console.log('📦 بدء تحميل المنتجات...');
     
     try {
         // محاولة الاتصال بـ Firebase أولاً
         if (window.db && typeof window.db.collection === 'function') {
-            console.log('تحميل المنتجات: محاولة الاتصال بـ Firebase...');
+            console.log('🔥 محاولة تحميل من Firebase...');
             
             try {
-                // إضافة مهلة زمنية (5 ثواني)
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('انتهت مهلة الاتصال بـ Firebase')), 5000)
-                );
+                // اختبار الاتصال مع مهلة زمنية
+                const testConnection = await Promise.race([
+                    window.db.collection('products').limit(1).get(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('انتهت مهلة الاتصال')), 3000))
+                ]);
                 
-                const dbPromise = window.db.collection('products').limit(1).get();
-                const result = await Promise.race([dbPromise, timeoutPromise]);
-                
-                if (result && !result.empty) {
-                    console.log('تحميل المنتجات: تم العثور على بيانات في Firebase');
+                if (testConnection && !testConnection.empty) {
+                    console.log('✅ Firebase متصل، جاري تحميل المنتجات...');
                     
                     // الحصول على جميع المنتجات
                     const snapshot = await window.db.collection('products').get();
                     
-                    // تفريغ المصفوفات القديمة
-                    Object.keys(products).forEach(key => products[key] = []);
-                    
-                    let loadedCount = 0;
-                    snapshot.forEach(doc => {
-                        const product = doc.data();
-                        product.id = doc.id;
+                    if (!snapshot.empty) {
+                        console.log(`✅ تم العثور على ${snapshot.size} منتج في Firebase`);
                         
-                        // تنظيف البيانات
-                        if (!product.category) product.category = 'offers';
-                        if (!product.price) product.price = 0;
-                        if (!product.name) product.name = 'منتج بدون اسم';
-                        if (!product.image) product.image = '📦';
+                        // مسح البيانات الحالية
+                        const currentProducts = {};
+                        Object.keys(products).forEach(key => currentProducts[key] = []);
                         
-                        // إضافة المنتج للفئة المناسبة
-                        if (products[product.category]) {
-                            products[product.category].push(product);
-                        } else {
-                            products.offers.push(product);
-                        }
+                        // تعبئة المنتجات الجديدة
+                        snapshot.forEach(doc => {
+                            const productData = doc.data();
+                            const product = {
+                                id: doc.id,
+                                name: productData.name || 'منتج بدون اسم',
+                                price: productData.price || 0,
+                                image: productData.image || '📦',
+                                description: productData.description || '',
+                                badge: productData.badge || null,
+                                category: productData.category || 'offers',
+                                oldPrice: productData.oldPrice || null,
+                                discount: productData.discount || null,
+                                timeLeft: productData.timeLeft || null
+                            };
+                            
+                            // إضافة المنتج للفئة المناسبة
+                            const category = product.category;
+                            if (currentProducts[category]) {
+                                currentProducts[category].push(product);
+                            } else {
+                                currentProducts.offers.push(product);
+                            }
+                        });
                         
-                        loadedCount++;
-                    });
-                    
-                    console.log(`تحميل المنتجات: تم تحميل ${loadedCount} منتج من Firebase`);
-                    
-                    // التحقق من وجود منتجات
-                    const totalProducts = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
-                    if (totalProducts > 0) {
-                        console.log('تحميل المنتجات: نجاح في تحميل منتجات Firebase');
+                        // تحديث البيانات الأصلية
+                        Object.keys(products).forEach(key => {
+                            products[key] = currentProducts[key] || [];
+                        });
+                        
+                        console.log('✅ تم تحميل منتجات Firebase بنجاح');
                         return true;
+                    } else {
+                        console.log('⚠️ Firebase فارغ، استخدام البيانات المحلية');
                     }
                 }
-                
-                console.log('تحميل المنتجات: قاعدة Firebase فارغة أو لا تحتوي على بيانات');
-                throw new Error('Firebase فارغ');
-                
             } catch (firebaseError) {
-                console.log('تحميل المنتجات: خطأ في Firebase:', firebaseError.message);
-                throw firebaseError;
+                console.log('❌ خطأ في Firebase:', firebaseError.message);
+                // الاستمرار في استخدام البيانات المحلية
             }
         } else {
-            console.log('تحميل المنتجات: Firebase غير متاح');
-            throw new Error('Firebase غير متاح');
+            console.log('ℹ️ Firebase غير متاح، استخدام البيانات المحلية');
         }
-    } catch (error) {
-        console.log('تحميل المنتجات: استخدام البيانات المحلية الاحتياطية');
         
-        // استخدام البيانات الاحتياطية
-        Object.keys(backupProducts).forEach(category => {
-            products[category] = [...backupProducts[category]];
-        });
-        
-        const totalProducts = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
-        console.log(`تحميل المنتجات: تم تحميل ${totalProducts} منتج محلي`);
+        // استخدام البيانات المحلية (التي تم تعريفها بالفعل)
+        console.log('✅ استخدام البيانات المحلية الاحتياطية');
+        console.log(`📊 عدد المنتجات: ${Object.values(products).reduce((sum, arr) => sum + arr.length, 0)}`);
         
         return true;
-    } finally {
-        // إخفاء مؤشر التحميل
-        if (window.uiManager) {
-            setTimeout(() => {
-                window.uiManager.showLoader(false);
-            }, 300);
-        }
+        
+    } catch (error) {
+        console.error('❌ خطأ في تحميل المنتجات:', error);
+        return false;
     }
 }
 
 // دالة لتهيئة الفئات
 function initCategories() {
+    console.log('🎯 تهيئة الفئات...');
     const categoriesContainer = document.getElementById('categories');
     const footerLinks = document.getElementById('footer-links');
     
-    if (!categoriesContainer) return;
+    if (!categoriesContainer) {
+        console.error('❌ عنصر الفئات غير موجود');
+        return;
+    }
     
     categoriesContainer.innerHTML = '';
     if (footerLinks) footerLinks.innerHTML = '';
@@ -533,6 +515,7 @@ function initCategories() {
         `;
         
         button.addEventListener('click', function() {
+            console.log(`🔄 تبديل إلى فئة: ${category.name}`);
             switchCategory(category.id);
         });
         
@@ -554,10 +537,14 @@ function initCategories() {
             footerLinks.appendChild(link);
         }
     });
+    
+    console.log('✅ تم تهيئة الفئات');
 }
 
 // دالة لتبديل الفئة
 function switchCategory(categoryId) {
+    console.log(`🔄 تبديل الفئة إلى: ${categoryId}`);
+    
     // تحديث أزرار الفئات
     document.querySelectorAll('.category-btn').forEach(btn => {
         if (btn.dataset.category === categoryId) {
@@ -594,10 +581,15 @@ function switchCategory(categoryId) {
 
 // دالة لعرض العروض
 function renderOffers() {
+    console.log('🎁 عرض العروض...');
     const offersSection = document.getElementById('offers');
-    if (!offersSection) return;
+    if (!offersSection) {
+        console.error('❌ قسم العروض غير موجود');
+        return;
+    }
     
     const offers = products.offers || [];
+    console.log(`📊 عدد العروض: ${offers.length}`);
     
     offersSection.innerHTML = `
         <div class="offers-section">
@@ -611,7 +603,7 @@ function renderOffers() {
             
             <div class="offers-grid" id="offers-grid">
                 ${offers.length === 0 ? `
-                    <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="empty-state">
                         <i class="fas fa-tags"></i>
                         <h3>لا توجد عروض حالياً</h3>
                         <p>سيتم إضافة عروض جديدة قريباً</p>
@@ -622,13 +614,13 @@ function renderOffers() {
                     
                     return `
                         <div class="offer-card">
-                            <div class="offer-banner">${offer.badge}</div>
+                            ${offer.badge ? `<div class="offer-banner">${offer.badge}</div>` : ''}
                             <div class="offer-image">
-                                ${offer.image}
+                                ${offer.image || '📦'}
                             </div>
                             <div class="offer-info">
                                 <h3 class="offer-name">${offer.name}</h3>
-                                <p class="offer-description">${offer.description}</p>
+                                <p class="offer-description">${offer.description || 'لا يوجد وصف'}</p>
                                 <div class="offer-price">
                                     ${offer.oldPrice ? `<div class="old-price">${offer.oldPrice} ريال</div>` : ''}
                                     <div class="new-price">${offer.price} ريال</div>
@@ -643,7 +635,7 @@ function renderOffers() {
                                     ` : ''}
                                     <button class="add-to-cart-btn ${quantity > 0 ? 'added' : ''}" 
                                             data-id="${offer.id}" 
-                                            data-category="${offer.category}">
+                                            data-category="${offer.category || 'offers'}">
                                         <i class="fas fa-${quantity > 0 ? 'check' : 'shopping-cart'}"></i>
                                         ${quantity > 0 ? 'مضاف' : 'أضف للسلة'}
                                     </button>
@@ -658,15 +650,22 @@ function renderOffers() {
     
     // إضافة مستمعي الأحداث للعروض
     addProductEventListeners();
+    console.log('✅ تم عرض العروض');
 }
 
 // دالة لعرض المنتجات
 function renderProducts(categoryId) {
+    console.log(`📦 عرض منتجات فئة: ${categoryId}`);
     const categorySection = document.getElementById(categoryId);
-    if (!categorySection) return;
+    if (!categorySection) {
+        console.error(`❌ قسم الفئة ${categoryId} غير موجود`);
+        return;
+    }
     
     const categoryProducts = products[categoryId] || [];
     const category = categories.find(c => c.id === categoryId);
+    
+    console.log(`📊 عدد المنتجات في الفئة: ${categoryProducts.length}`);
     
     categorySection.innerHTML = `
         <div class="section-header">
@@ -679,7 +678,7 @@ function renderProducts(categoryId) {
         
         <div class="products-grid" id="${categoryId}-products">
             ${categoryProducts.length === 0 ? `
-                <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="empty-state">
                     <i class="fas fa-box-open"></i>
                     <h3>لا توجد منتجات حالياً</h3>
                     <p>سيتم إضافة منتجات جديدة قريباً في هذه الفئة</p>
@@ -692,7 +691,7 @@ function renderProducts(categoryId) {
                     <div class="product-card">
                         ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
                         <div class="product-image">
-                            ${product.image}
+                            ${product.image || '📦'}
                         </div>
                         <div class="product-info">
                             <div class="product-category">
@@ -700,11 +699,11 @@ function renderProducts(categoryId) {
                                 ${category?.name || ''}
                             </div>
                             <h3 class="product-name">${product.name}</h3>
-                            <p class="product-description">${product.description}</p>
+                            <p class="product-description">${product.description || 'لا يوجد وصف'}</p>
                             <div class="product-footer">
                                 <div class="product-price">${product.price}<span> ريال</span></div>
                                 <div class="product-actions">
-                                    <div class="quantity-control" ${quantity === 0 ? 'style="display:none;"' : ''}>
+                                    <div class="quantity-control" style="display: ${quantity > 0 ? 'flex' : 'none'};">
                                         <button class="quantity-btn minus" data-id="${product.id}">
                                             <i class="fas fa-minus"></i>
                                         </button>
@@ -715,7 +714,7 @@ function renderProducts(categoryId) {
                                     </div>
                                     <button class="add-to-cart-btn ${quantity > 0 ? 'added' : ''}" 
                                             data-id="${product.id}" 
-                                            data-category="${product.category}">
+                                            data-category="${product.category || categoryId}">
                                         <i class="fas fa-${quantity > 0 ? 'check' : 'shopping-cart'}"></i>
                                         ${quantity > 0 ? 'مضاف' : 'أضف للسلة'}
                                     </button>
@@ -730,21 +729,28 @@ function renderProducts(categoryId) {
     
     // إضافة مستمعي الأحداث للمنتجات
     addProductEventListeners();
+    console.log('✅ تم عرض المنتجات');
 }
 
 // دالة لإضافة مستمعي الأحداث للمنتجات
 function addProductEventListeners() {
+    console.log('🎯 إضافة مستمعي الأحداث للمنتجات...');
+    
     // أزرار إضافة إلى السلة
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             const id = this.dataset.id;
             const category = this.dataset.category;
             
+            console.log(`🛒 النقر على إضافة منتج: ${id}`);
+            
             if (window.cartManager) {
                 const cartItem = window.cartManager.getCartItem(id);
                 if (cartItem) {
+                    console.log(`➖ إزالة منتج من السلة: ${id}`);
                     window.cartManager.removeFromCart(id);
                 } else {
+                    console.log(`➕ إضافة منتج إلى السلة: ${id}`);
                     window.cartManager.addToCart(id, category);
                 }
             }
@@ -757,6 +763,8 @@ function addProductEventListeners() {
     document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
         btn.addEventListener('click', function(e) {
             const id = this.dataset.id;
+            console.log(`➕ زيادة كمية المنتج: ${id}`);
+            
             if (window.cartManager) {
                 window.cartManager.addToCart(id);
             }
@@ -768,12 +776,16 @@ function addProductEventListeners() {
     document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
         btn.addEventListener('click', function(e) {
             const id = this.dataset.id;
+            console.log(`➖ تقليل كمية المنتج: ${id}`);
+            
             if (window.cartManager) {
                 window.cartManager.updateCartItemQuantity(id, -1);
             }
             e.stopPropagation();
         });
     });
+    
+    console.log('✅ تم إضافة مستمعي الأحداث');
 }
 
 // دالة لتحديث عدد المنتجات
@@ -787,8 +799,12 @@ function updateProductsCount(categoryId) {
 
 // دالة لتهيئة طرق الدفع
 function initPaymentMethods() {
+    console.log('💳 تهيئة طرق الدفع...');
     const paymentMethodsContainer = document.getElementById('payment-methods');
-    if (!paymentMethodsContainer) return;
+    if (!paymentMethodsContainer) {
+        console.error('❌ عنصر طرق الدفع غير موجود');
+        return;
+    }
     
     paymentMethodsContainer.innerHTML = paymentMethods.map(method => `
         <div class="payment-method">
@@ -800,6 +816,8 @@ function initPaymentMethods() {
             </label>
         </div>
     `).join('');
+    
+    console.log('✅ تم تهيئة طرق الدفع');
 }
 
 // دالة للحصول على منتج بواسطة ID
@@ -821,10 +839,30 @@ function getCategoryName(categoryId) {
 
 // دالة لإعادة تحميل المنتجات
 async function reloadProducts() {
+    console.log('🔄 إعادة تحميل المنتجات...');
     await loadProductsFromJSON();
+    
     // إعادة عرض الفئة النشطة حالياً
     const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
     switchCategory(activeCategory);
+    
+    console.log('✅ تم إعادة تحميل المنتجات');
+}
+
+// دالة لبدء عرض المنتجات (بدون انتظار)
+function startProducts() {
+    console.log('🚀 بدء عرض المنتجات...');
+    
+    // تهيئة الفئات
+    initCategories();
+    
+    // تهيئة طرق الدفع
+    initPaymentMethods();
+    
+    // عرض العروض
+    renderOffers();
+    
+    console.log('✅ المنتجات جاهزة للعرض');
 }
 
 // تصدير الدوال
@@ -840,6 +878,9 @@ window.productsManager = {
     getProductById,
     getCategoryName,
     loadProductsFromJSON,
-    reloadProducts
+    reloadProducts,
+    startProducts  // دالة جديدة للبدء الفوري
 };
+
+console.log('✅ products.js تم التحميل بنجاح');
 [file content end]
