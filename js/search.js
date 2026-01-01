@@ -11,13 +11,17 @@ class SearchManager {
     init() {
         this.createSearchBar();
         this.setupEventListeners();
+        console.log('SearchManager: تم التهيئة');
     }
     
     // إنشاء شريط البحث
     createSearchBar() {
         // إنشاء شريط البحث في الهيدر
         const headerContent = document.querySelector('.header-content');
-        if (!headerContent) return;
+        if (!headerContent) {
+            console.error('SearchManager: header-content غير موجود');
+            return;
+        }
         
         this.searchContainer = document.createElement('div');
         this.searchContainer.className = 'search-container';
@@ -30,20 +34,25 @@ class SearchManager {
             <div class="search-results" id="search-results"></div>
         `;
         
-        // إدراج شريط البحث بعد الشعار
-        const logo = headerContent.querySelector('.logo');
-        if (logo) {
-            logo.insertAdjacentElement('afterend', this.searchContainer);
+        // إدراج شريط البحث قبل زر السلة
+        const cartIcon = document.querySelector('.header-actions');
+        if (cartIcon) {
+            headerContent.insertBefore(this.searchContainer, cartIcon);
         } else {
-            headerContent.insertBefore(this.searchContainer, headerContent.firstChild);
+            headerContent.appendChild(this.searchContainer);
         }
         
         this.searchInput = document.getElementById('global-search');
         this.searchResults = document.getElementById('search-results');
+        
+        console.log('SearchManager: تم إنشاء شريط البحث');
     }
     
     setupEventListeners() {
-        if (!this.searchInput) return;
+        if (!this.searchInput) {
+            console.error('SearchManager: search-input غير موجود');
+            return;
+        }
         
         // البحث أثناء الكتابة
         this.searchInput.addEventListener('input', () => {
@@ -67,7 +76,8 @@ class SearchManager {
         // زر البحث
         const searchBtn = document.getElementById('search-btn');
         if (searchBtn) {
-            searchBtn.addEventListener('click', () => {
+            searchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.performSearch();
             });
         }
@@ -76,13 +86,6 @@ class SearchManager {
         document.addEventListener('click', (e) => {
             if (!this.searchContainer?.contains(e.target)) {
                 this.searchResults.style.display = 'none';
-            }
-        });
-        
-        // تصفية عند اختيار فئة
-        document.addEventListener('categorySelected', (e) => {
-            if (e.detail?.categoryId && this.searchInput.value.trim().length > 0) {
-                this.performSearch();
             }
         });
     }
@@ -104,10 +107,15 @@ class SearchManager {
     
     // البحث في المنتجات
     searchProducts(query) {
+        if (!window.productsManager?.products) {
+            console.error('SearchManager: products غير موجودة');
+            return [];
+        }
+        
         const allProducts = [];
         
         // جمع جميع المنتجات من جميع الفئات
-        Object.values(window.productsManager?.products || {}).forEach(categoryProducts => {
+        Object.values(window.productsManager.products).forEach(categoryProducts => {
             categoryProducts.forEach(product => {
                 allProducts.push(product);
             });
@@ -120,11 +128,11 @@ class SearchManager {
                 product.description,
                 product.category,
                 product.badge,
-                product.price.toString()
-            ];
+                product.price?.toString()
+            ].filter(field => field); // إزالة القيم الفارغة
             
             return searchFields.some(field => 
-                field && field.toString().toLowerCase().includes(query)
+                field.toLowerCase().includes(query)
             );
         });
     }
@@ -139,7 +147,7 @@ class SearchManager {
                     <i class="fas fa-search"></i>
                     <div class="search-result-info">
                         <h4>لا توجد نتائج</h4>
-                        <p>لم يتم العثور على منتجات تطابق البحث</p>
+                        <p>لم يتم العثور على منتجات تطابق "${this.searchInput.value}"</p>
                     </div>
                 </div>
             `;
@@ -147,13 +155,15 @@ class SearchManager {
         }
         
         let html = '';
-        results.slice(0, 10).forEach(product => {
+        const limitedResults = results.slice(0, 8); // عرض 8 نتائج فقط
+        
+        limitedResults.forEach(product => {
             const categoryName = window.productsManager?.getCategoryName(product.category) || product.category;
             
             html += `
                 <div class="search-result-item" data-id="${product.id}">
                     <div class="search-result-image">
-                        ${product.image}
+                        ${product.image || '📦'}
                     </div>
                     <div class="search-result-info">
                         <h4>${this.highlightText(product.name, this.searchInput.value)}</h4>
@@ -167,10 +177,10 @@ class SearchManager {
             `;
         });
         
-        if (results.length > 10) {
+        if (results.length > 8) {
             html += `
                 <div class="search-result-more">
-                    <span>+${results.length - 10} منتج إضافي</span>
+                    <span>+${results.length - 8} منتج إضافي</span>
                 </div>
             `;
         }
@@ -181,10 +191,14 @@ class SearchManager {
     
     // إضافة تأثير تمييز للنص
     highlightText(text, query) {
-        if (!query) return text;
+        if (!query || !text) return text;
         
-        const regex = new RegExp(`(${query})`, 'gi');
-        return text.replace(regex, '<span class="highlight">$1</span>');
+        try {
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        } catch (error) {
+            return text;
+        }
     }
     
     // إضافة مستمعي الأحداث للنتائج
@@ -217,10 +231,10 @@ class SearchManager {
     
     // عرض المنتج
     viewProduct(productId) {
-        const product = window.productsManager?.getProductById(productId);
+        const product = window.productsManager?.getProductById?.(productId);
         if (product && product.category) {
             // تبديل إلى الفئة المناسبة
-            window.productsManager?.switchCategory(product.category);
+            window.productsManager?.switchCategory?.(product.category);
             
             // تمرير إلى المنتج
             setTimeout(() => {
@@ -259,5 +273,7 @@ class SearchManager {
     }
 }
 
-// تهيئة مدير البحث
-window.searchManager = new SearchManager();
+// تهيئة مدير البحث عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    window.searchManager = new SearchManager();
+});
