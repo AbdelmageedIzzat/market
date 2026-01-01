@@ -1,5 +1,30 @@
 // التطبيق الرئيسي
+// في بداية app.js
+let db = null;
 
+async function initFirebase() {
+    try {
+        // تحميل إعدادات Firebase
+        const response = await fetch('js/firebase-config.js');
+        if (!response.ok) throw new Error('Firebase config not found');
+        
+        // تهيئة Firebase (إذا كان موجوداً)
+        if (typeof firebase !== 'undefined') {
+            const app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            window.db = db; // لجعله متاحاً في كل الملفات
+            console.log('Firebase initialized successfully');
+        }
+    } catch (error) {
+        console.log('Firebase not available, using local data');
+    }
+}
+
+// استدعاء في init()
+async function init() {
+    await initFirebase();
+    // باقي الكود...
+}
 class App {
     constructor() {
         this.init();
