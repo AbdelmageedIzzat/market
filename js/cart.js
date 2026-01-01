@@ -16,6 +16,17 @@ class CartManager {
     init() {
         this.updateCartUI();
         console.log('CartManager: تم التهيئة');
+        
+        // إضافة مستمع حدث يدوي لفتح السلة (كدعم إضافي)
+        const cartIcon = document.getElementById('cart-icon');
+        if (cartIcon) {
+            cartIcon.addEventListener('click', () => {
+                console.log('CartManager: تم النقر على السلة من cart.js');
+                if (window.uiManager) {
+                    window.uiManager.openCartSidebar();
+                }
+            });
+        }
     }
     
     // إضافة منتج إلى السلة
@@ -70,8 +81,7 @@ class CartManager {
             window.uiManager.pulseCartIcon();
         }
         
-        // إبقاء السلة مفتوحة
-        this.keepCartOpen();
+        // ❌ لا تفتح السلة تلقائياً - يتابع المستخدم التسوق
     }
     
     // تحديث واجهة السلة
@@ -95,6 +105,10 @@ class CartManager {
                     <i class="fas fa-shopping-bag"></i>
                     <h3>سلة المشتريات فارغة</h3>
                     <p>لم تقم بإضافة أي منتجات بعد. ابدأ بالتسوق الآن!</p>
+                    <button class="continue-shopping-btn" onclick="window.productsManager?.switchCategory('offers')">
+                        <i class="fas fa-shopping-cart"></i>
+                        ابدأ التسوق
+                    </button>
                 </div>
             `;
             return;
@@ -184,9 +198,6 @@ class CartManager {
             this.saveCart();
             this.updateCartUI();
             this.updateProductUI(productId);
-            
-            // إبقاء السلة مفتوحة
-            this.keepCartOpen();
         }
     }
     
@@ -200,16 +211,6 @@ class CartManager {
             this.updateCartUI();
             this.updateProductUI(productId);
             window.uiManager?.showNotification('تمت الإزالة', 'تمت إزالة المنتج من السلة');
-            
-            // إبقاء السلة مفتوحة
-            this.keepCartOpen();
-        }
-    }
-    
-    // إبقاء السلة مفتوحة عند التعديل
-    keepCartOpen() {
-        if (window.uiManager) {
-            window.uiManager.openCartSidebar();
         }
     }
     
@@ -315,4 +316,3 @@ class CartManager {
 
 // تهيئة مدير السلة
 window.cartManager = new CartManager();
-
