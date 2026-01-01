@@ -413,47 +413,102 @@ const paymentMethods = [
         icon: 'money-check'
     }
 ];
+// js/products.js (تحديث دالة loadProductsFromJSON فقط)
 
 // دالة لتحميل المنتجات من Firebase أو استخدام البيانات المحلية
 async function loadProductsFromJSON() {
+    console.log('تحميل المنتجات: بدء العملية...');
+    
+    // مؤشر تحميل
+    if (window.uiManager) {
+        window.uiManager.showLoader(true);
+    }
+    
     try {
-        if (window.db) { // إذا كان Firebase متاحاً
-            const snapshot = await window.db.collection('products').get();
+        // محاولة الاتصال بـ Firebase أولاً
+        if (window.db && typeof window.db.collection === 'function') {
+            console.log('تحميل المنتجات: محاولة الاتصال بـ Firebase...');
             
-            // تفريغ المصفوفات القديمة
-            Object.keys(products).forEach(key => products[key] = []);
-            
-            snapshot.forEach(doc => {
-                const product = doc.data();
-                product.id = doc.id;
+            try {
+                // إضافة مهلة زمنية (5 ثواني)
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('انتهت مهلة الاتصال بـ Firebase')), 5000)
+                );
                 
-                // إضافة المنتج للفئة المناسبة
-                if (products[product.category]) {
-                    products[product.category].push(product);
-                } else {
-                    // إذا لم تكن الفئة موجودة، أضفه إلى العروض
-                    products.offers.push(product);
+                const dbPromise = window.db.collection('products').limit(1).get();
+                const result = await Promise.race([dbPromise, timeoutPromise]);
+                
+                if (result && !result.empty) {
+                    console.log('تحميل المنتجات: تم العثور على بيانات في Firebase');
+                    
+                    // الحصول على جميع المنتجات
+                    const snapshot = await window.db.collection('products').get();
+                    
+                    // تفريغ المصفوفات القديمة
+                    Object.keys(products).forEach(key => products[key] = []);
+                    
+                    let loadedCount = 0;
+                    snapshot.forEach(doc => {
+                        const product = doc.data();
+                        product.id = doc.id;
+                        
+                        // تنظيف البيانات
+                        if (!product.category) product.category = 'offers';
+                        if (!product.price) product.price = 0;
+                        if (!product.name) product.name = 'منتج بدون اسم';
+                        if (!product.image) product.image = '📦';
+                        
+                        // إضافة المنتج للفئة المناسبة
+                        if (products[product.category]) {
+                            products[product.category].push(product);
+                        } else {
+                            products.offers.push(product);
+                        }
+                        
+                        loadedCount++;
+                    });
+                    
+                    console.log(`تحميل المنتجات: تم تحميل ${loadedCount} منتج من Firebase`);
+                    
+                    // التحقق من وجود منتجات
+                    const totalProducts = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
+                    if (totalProducts > 0) {
+                        console.log('تحميل المنتجات: نجاح في تحميل منتجات Firebase');
+                        return true;
+                    }
                 }
-            });
-            
-            console.log('تم تحميل المنتجات من Firebase');
-            
-            // التحقق من وجود منتجات
-            const totalProducts = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
-            if (totalProducts === 0) {
-                throw new Error('لا توجد منتجات في قاعدة البيانات');
+                
+                console.log('تحميل المنتجات: قاعدة Firebase فارغة أو لا تحتوي على بيانات');
+                throw new Error('Firebase فارغ');
+                
+            } catch (firebaseError) {
+                console.log('تحميل المنتجات: خطأ في Firebase:', firebaseError.message);
+                throw firebaseError;
             }
-            
-            return true;
+        } else {
+            console.log('تحميل المنتجات: Firebase غير متاح');
+            throw new Error('Firebase غير متاح');
         }
     } catch (error) {
-        console.log('خطأ في تحميل المنتجات من Firebase:', error);
+        console.log('تحميل المنتجات: استخدام البيانات المحلية الاحتياطية');
         
         // استخدام البيانات الاحتياطية
-        Object.assign(products, backupProducts);
-        console.log('تم استخدام المنتجات المحلية الاحتياطية');
+        Object.keys(backupProducts).forEach(category => {
+            products[category] = [...backupProducts[category]];
+        });
+        
+        const totalProducts = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
+        console.log(`تحميل المنتجات: تم تحميل ${totalProducts} منتج محلي`);
+        
+        return true;
+    } finally {
+        // إخفاء مؤشر التحميل
+        if (window.uiManager) {
+            setTimeout(() => {
+                window.uiManager.showLoader(false);
+            }, 300);
+        }
     }
-    return false;
 }
 
 // دالة لتهيئة الفئات
