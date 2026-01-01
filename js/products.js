@@ -1,3 +1,5 @@
+[file name]: products.js
+[file content begin]
 // بيانات الفئات والمنتجات
 
 // بيانات الفئات
@@ -10,8 +12,18 @@ const categories = [
     { id: 'home', name: 'أدوات منزلية', icon: 'home', color: '#6A66FF' }
 ];
 
-// بيانات المنتجات (يمكن استبدالها ببيانات من ملف JSON)
+// بيانات المنتجات (سيتم تحميلها من Firebase أو استخدام البيانات المحلية)
 const products = {
+    offers: [],
+    accessories: [],
+    cosmetics: [],
+    clothing: [],
+    electronics: [],
+    home: []
+};
+
+// بيانات المنتجات الاحتياطية (إذا لم يتم تحميلها من Firebase)
+const backupProducts = {
     offers: [
         {
             id: 'offer1',
@@ -402,18 +414,44 @@ const paymentMethods = [
     }
 ];
 
-// دالة لتحميل المنتجات من ملف JSON (إذا كان موجوداً)
+// دالة لتحميل المنتجات من Firebase أو استخدام البيانات المحلية
 async function loadProductsFromJSON() {
     try {
-        const response = await fetch('data/products.json');
-        if (response.ok) {
-            const data = await response.json();
-            Object.assign(products, data.products);
-            Object.assign(paymentMethods, data.paymentMethods);
+        if (window.db) { // إذا كان Firebase متاحاً
+            const snapshot = await window.db.collection('products').get();
+            
+            // تفريغ المصفوفات القديمة
+            Object.keys(products).forEach(key => products[key] = []);
+            
+            snapshot.forEach(doc => {
+                const product = doc.data();
+                product.id = doc.id;
+                
+                // إضافة المنتج للفئة المناسبة
+                if (products[product.category]) {
+                    products[product.category].push(product);
+                } else {
+                    // إذا لم تكن الفئة موجودة، أضفه إلى العروض
+                    products.offers.push(product);
+                }
+            });
+            
+            console.log('تم تحميل المنتجات من Firebase');
+            
+            // التحقق من وجود منتجات
+            const totalProducts = Object.values(products).reduce((sum, arr) => sum + arr.length, 0);
+            if (totalProducts === 0) {
+                throw new Error('لا توجد منتجات في قاعدة البيانات');
+            }
+            
             return true;
         }
     } catch (error) {
-        console.log('استخدام المنتجات المحلية، خطأ في تحميل ملف JSON:', error);
+        console.log('خطأ في تحميل المنتجات من Firebase:', error);
+        
+        // استخدام البيانات الاحتياطية
+        Object.assign(products, backupProducts);
+        console.log('تم استخدام المنتجات المحلية الاحتياطية');
     }
     return false;
 }
@@ -537,15 +575,17 @@ function renderOffers() {
                                 <h3 class="offer-name">${offer.name}</h3>
                                 <p class="offer-description">${offer.description}</p>
                                 <div class="offer-price">
-                                    <div class="old-price">${offer.oldPrice} ريال</div>
+                                    ${offer.oldPrice ? `<div class="old-price">${offer.oldPrice} ريال</div>` : ''}
                                     <div class="new-price">${offer.price} ريال</div>
-                                    <div class="discount-percent">%${offer.discount}</div>
+                                    ${offer.discount ? `<div class="discount-percent">%${offer.discount}</div>` : ''}
                                 </div>
                                 <div class="offer-actions">
+                                    ${offer.timeLeft ? `
                                     <div class="time-left">
                                         <i class="fas fa-clock"></i>
                                         <span>${offer.timeLeft}</span>
                                     </div>
+                                    ` : ''}
                                     <button class="add-to-cart-btn ${quantity > 0 ? 'added' : ''}" 
                                             data-id="${offer.id}" 
                                             data-category="${offer.category}">
@@ -724,6 +764,14 @@ function getCategoryName(categoryId) {
     return category ? category.name : '';
 }
 
+// دالة لإعادة تحميل المنتجات
+async function reloadProducts() {
+    await loadProductsFromJSON();
+    // إعادة عرض الفئة النشطة حالياً
+    const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
+    switchCategory(activeCategory);
+}
+
 // تصدير الدوال
 window.productsManager = {
     categories,
@@ -736,5 +784,7 @@ window.productsManager = {
     renderProducts,
     getProductById,
     getCategoryName,
-    loadProductsFromJSON
+    loadProductsFromJSON,
+    reloadProducts
 };
+[file content end]
