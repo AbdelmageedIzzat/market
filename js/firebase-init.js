@@ -1,62 +1,66 @@
 // js/firebase-init.js
-console.log('Firebase Init: جارٍ التحميل...');
+[file content begin]
+console.log('🔥 تهيئة Firebase...');
 
-try {
-    // التحقق من وجود Firebase
-    if (typeof firebase === 'undefined') {
-        throw new Error('Firebase SDK غير محمّل');
-    }
-    
-    // التحقق من وجود الإعدادات
-    if (typeof firebaseConfig === 'undefined') {
-        throw new Error('إعدادات Firebase غير موجودة');
-    }
-    
-    console.log('Firebase Init: جارٍ التهيئة...');
-    
-    // تهيئة Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    
-    // تهيئة الخدمات
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    
-    // تعيين المتغيرات العامة
-    window.auth = auth;
-    window.db = db;
-    
-    console.log('Firebase Init: تم التهيئة بنجاح');
-    
-    // إعداد مراقب حالة المصادقة
-    auth.onAuthStateChanged((user) => {
-        console.log('Firebase Auth: تغيير حالة المصادقة');
-        if (user) {
-            console.log('Firebase Auth: مستخدم مسجل:', user.email);
-        } else {
-            console.log('Firebase Auth: لا يوجد مستخدم مسجل');
+// دالة مبسطة لتهيئة Firebase
+function initFirebase() {
+    try {
+        // التحقق من وجود Firebase SDK
+        if (typeof firebase === 'undefined') {
+            console.log('ℹ️ Firebase SDK غير محمّل، استخدام البيانات المحلية');
+            return { success: false, message: 'Firebase غير محمل' };
         }
-    });
-    
-    // اختبار الاتصال
-    db.collection('products').limit(1).get()
-        .then(() => {
-            console.log('Firebase Firestore: الاتصال ناجح');
-        })
-        .catch(error => {
-            console.warn('Firebase Firestore: خطأ في الاتصال:', error.message);
-        });
         
-} catch (error) {
-    console.error('Firebase Init: خطأ في التهيئة:', error.message);
-    
-    // استخدام نسخة وهمية للبيانات المحلية
-    window.db = null;
-    window.auth = {
-        onAuthStateChanged: (callback) => callback(null),
-        signInWithEmailAndPassword: () => Promise.reject(new Error('Firebase غير متاح')),
-        createUserWithEmailAndPassword: () => Promise.reject(new Error('Firebase غير متاح')),
-        signOut: () => Promise.resolve()
-    };
-    
-    console.log('Firebase Init: تم استخدام البيانات المحلية');
+        // التحقق من وجود الإعدادات
+        if (typeof firebaseConfig === 'undefined') {
+            console.log('ℹ️ إعدادات Firebase غير موجودة، استخدام البيانات المحلية');
+            return { success: false, message: 'إعدادات Firebase غير موجودة' };
+        }
+        
+        console.log('✅ بدء تهيئة Firebase...');
+        
+        // تهيئة Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        
+        // تهيئة الخدمات
+        window.auth = firebase.auth();
+        window.db = firebase.firestore();
+        
+        console.log('✅ تم تهيئة Firebase بنجاح');
+        
+        // اختبار الاتصال البسيط
+        setTimeout(() => {
+            if (window.db) {
+                window.db.collection('products').limit(1).get()
+                    .then(snapshot => {
+                        console.log(`✅ Firebase متصل، عدد المنتجات: ${snapshot.size}`);
+                    })
+                    .catch(error => {
+                        console.log('⚠️ Firebase متصل ولكن قد تكون قاعدة البيانات فارغة');
+                    });
+            }
+        }, 1000);
+        
+        return { success: true, message: 'تم تهيئة Firebase' };
+        
+    } catch (error) {
+        console.log('❌ خطأ في تهيئة Firebase:', error.message);
+        
+        // استخدام نسخة وهمية
+        window.db = null;
+        window.auth = null;
+        
+        return { success: false, message: 'تم استخدام البيانات المحلية' };
+    }
 }
+
+// البدء في الخلفية (لا تنتظر)
+setTimeout(() => {
+    initFirebase();
+}, 500);
+
+// جعل الدالة متاحة للاستخدام
+window.initFirebase = initFirebase;
+
+console.log('✅ firebase-init.js جاهز');
+[file content end]
