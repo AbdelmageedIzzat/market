@@ -2046,3 +2046,337 @@
         max-width: 100% !important;
     }
 }
+/* تحسينات خاصة للموبايل */
+
+/* زر استمرار التسوق في السلة الفارغة */
+.continue-shopping-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+    width: 100%;
+    font-family: 'Cairo', sans-serif;
+    font-size: var(--font-sm);
+}
+
+.continue-shopping-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(58, 54, 224, 0.3);
+}
+
+/* إشعار السلة في الموبايل */
+.cart-notification-mobile {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 15px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 999;
+    box-shadow: var(--shadow-dark);
+    transform: translateY(100px);
+    transition: transform 0.3s ease;
+}
+
+.cart-notification-mobile.show {
+    transform: translateY(0);
+}
+
+.cart-notification-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cart-notification-info i {
+    font-size: var(--icon-lg);
+}
+
+.cart-notification-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.cart-notification-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-xs);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.cart-notification-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* نافذة التأكيد النهائية */
+.final-confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    padding: 15px;
+}
+
+.final-confirmation-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.final-confirmation-content {
+    background-color: white;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-dark);
+    transform: translateY(20px);
+    transition: var(--transition);
+}
+
+.final-confirmation-modal.active .final-confirmation-content {
+    transform: translateY(0);
+}
+
+.confirmation-header {
+    background: linear-gradient(135deg, var(--success) 0%, #0DA67A 100%);
+    color: white;
+    padding: 25px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    text-align: center;
+}
+
+.confirmation-header h3 {
+    font-size: var(--font-xl);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.confirmation-header i {
+    font-size: var(--icon-lg);
+}
+
+.confirmation-body {
+    padding: 30px;
+}
+
+.order-details-confirm {
+    background: var(--light);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid var(--gray);
+}
+
+.order-detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--gray);
+}
+
+.order-detail-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.whatsapp-notice {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    padding: 20px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+.whatsapp-notice i {
+    font-size: var(--icon-2xl);
+}
+
+.whatsapp-notice p {
+    margin: 0;
+    font-weight: 600;
+    font-size: var(--font-base);
+}
+
+.final-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    margin-top: 20px;
+    font-size: var(--font-sm);
+}
+
+.confirmation-footer {
+    padding: 25px;
+    border-top: 1px solid var(--gray);
+    display: flex;
+    gap: 15px;
+}
+
+.send-whatsapp-btn {
+    flex: 2;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: var(--font-base);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+}
+
+.send-whatsapp-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+}
+
+.edit-order-btn {
+    flex: 1;
+    background: var(--gray);
+    color: var(--text);
+    border: none;
+    padding: 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.edit-order-btn:hover {
+    background: var(--gray-dark);
+}
+
+/* تحسينات للمنتجات في الموبايل */
+@media (max-width: 768px) {
+    .product-actions {
+        flex-wrap: nowrap;
+    }
+    
+    .quantity-control {
+        order: 1;
+    }
+    
+    .add-to-cart-btn {
+        order: 2;
+        flex-grow: 1;
+    }
+    
+    /* جعل أزرار السلة أكبر في الموبايل */
+    .cart-item-quantity .quantity-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .remove-item {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* تحسينات للعروض في الموبايل */
+@media (max-width: 768px) {
+    .offer-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .time-left {
+        align-self: flex-start;
+    }
+    
+    .add-to-cart-btn {
+        width: 100%;
+    }
+}
+
+/* إصلاحات السلة */
+.cart-icon {
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+.cart-icon:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* تحسين ظهور السلة */
+.cart-sidebar.active {
+    left: 0 !important;
+    animation: slideIn 0.3s ease-out !important;
+}
+
+/* التأكد من أن السلة فوق كل شيء */
+.cart-sidebar {
+    z-index: 1100 !important;
+}
+
+/* تأثيرات الحركة */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* التأكد من أن زر السلة قابل للنقر */
+#cart-icon {
+    pointer-events: auto !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+}
