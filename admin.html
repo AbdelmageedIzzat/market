@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المتجر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        /* تنسيقات تسجيل الدخول */
+        #admin-login {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        #admin-login h2 {
+            color: #3A36E0;
+            margin-bottom: 30px;
+        }
+        
+        #admin-login input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        #admin-login button {
+            width: 100%;
+            padding: 12px;
+            background: #3A36E0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        /* تنسيقات لوحة التحكم */
+        #admin-panel {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #3A36E0, #6A66FF);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .admin-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .admin-section h3 {
+            color: #3A36E0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .btn {
+            background: #3A36E0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2A27B3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #EF4444;
+        }
+        
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+        
+        .product-item, .order-item {
+            background: #f8f9ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #e4e6ef;
+        }
+        
+        /* نموذج إضافة منتج */
+        #add-product-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            z-index: 1000;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <!-- تسجيل الدخول -->
+    <div id="admin-login">
+        <h2><i class="fas fa-lock"></i> تسجيل دخول المدير</h2>
+        <input type="email" id="admin-email" placeholder="البريد الإلكتروني">
+        <input type="password" id="admin-password" placeholder="كلمة المرور">
+        <button onclick="adminLogin()"><i class="fas fa-sign-in-alt"></i> دخول</button>
+        <div id="login-error" style="color: red; margin-top: 10px;"></div>
+    </div>
+    
+    <!-- لوحة التحكم -->
+    <div id="admin-panel" style="display: none;">
+        <div class="admin-header">
+            <div>
+                <h1><i class="fas fa-cogs"></i> لوحة تحكم المتجر</h1>
+                <p>مرحباً, <span id="admin-name">المدير</span></p>
+            </div>
+            <button class="btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</button>
+        </div>
+        
+        <div class="admin-sections">
+            <!-- إدارة المنتجات -->
+            <div class="admin-section">
+                <h3><i class="fas fa-box"></i> إدارة المنتجات</h3>
+                <button class="btn" onclick="showAddProductForm()">
+                    <i class="fas fa-plus"></i> إضافة منتج جديد
+                </button>
+                <div id="products-list" style="margin-top: 20px;">
+                    <p>جاري تحميل المنتجات...</p>
+                </div>
+            </div>
+            
+            <!-- إدارة الطلبات -->
+            <div class="admin-section">
+                <h3><i class="fas fa-shopping-bag"></i> إدارة الطلبات</h3>
+                <div id="orders-list">
+                    <p>جاري تحميل الطلبات...</p>
+                </div>
+            </div>
+            
+            <!-- إحصاءات سريعة -->
+            <div class="admin-section">
+                <h3><i class="fas fa-chart-bar"></i> إحصاءات</h3>
+                <div id="stats">
+                    <p>عدد المنتجات: <span id="products-count">0</span></p>
+                    <p>عدد الطلبات: <span id="orders-count">0</span></p>
+                    <p>إجمالي المبيعات: <span id="total-sales">0</span> ريال</p>
+                </div>
+                <button class="btn" onclick="refreshData()" style="margin-top: 15px;">
+                    <i class="fas fa-sync-alt"></i> تحديث البيانات
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نموذج إضافة منتج -->
+    <div id="add-product-form">
+        <h3><i class="fas fa-plus-circle"></i> إضافة منتج جديد</h3>
+        
+        <div class="form-group">
+            <label for="product-name">اسم المنتج *</label>
+            <input type="text" id="product-name" placeholder="مثال: آيفون 14 برو">
+        </div>
+        
+        <div class="form-group">
+            <label for="product-price">السعر (ريال) *</label>
+            <input type="number" id="product-price" placeholder="مثال: 4499">
+        </div>
+        
+        <div class="form-group">
+            <label for="product-category">الفئة *</label>
+            <select id="product-category">
+                <option value="">اختر الفئة</option>
+                <option value="offers">العروض والخصومات</option>
+                <option value="accessories">الإكسسوارات</option>
+                <option value="cosmetics">مستحضرات التجميل</option>
+                <option value="clothing">الملابس</option>
+                <option value="electronics">الإلكترونيات</option>
+                <option value="home">أدوات منزلية</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="product-image">رمز الإيموجي</label>
+            <input type="text" id="product-image" placeholder="مثال: 📱" value="📦">
+            <small>يمكنك استخدام إيموجي مثل: 📱 👕 💄 🎧</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="product-description">الوصف</label>
+            <textarea id="product-description" placeholder="وصف المنتج..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="product-badge">علامة خاصة (اختياري)</label>
+            <input type="text" id="product-badge" placeholder="مثال: جديد، الأكثر مبيعاً">
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn" onclick="addProduct()" style="flex: 1;">
+                <i class="fas fa-save"></i> حفظ المنتج
+            </button>
+            <button class="btn btn-danger" onclick="hideAddProductForm()" style="flex: 1;">
+                <i class="fas fa-times"></i> إلغاء
+            </button>
+        </div>
+    </div>
+    
+    <!-- طبقة شفافة للنماذج -->
+    <div class="overlay" id="overlay" onclick="hideAddProductForm()"></div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- ملف الإعدادات -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- الكود الرئيسي -->
+    <script>
+        // ==================== تهيئة Firebase ====================
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentAdmin = null;
+        
+        // ==================== متابعة حالة المستخدم ====================
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentAdmin = user;
+                document.getElementById('admin-name').textContent = user.email.split('@')[0];
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                loadAllData();
+            } else {
+                currentAdmin = null;
+                document.getElementById('admin-login').style.display = 'block';
+                document.getElementById('admin-panel').style.display = 'none';
+            }
+        });
+        
+        // ==================== تسجيل الدخول ====================
+        async function adminLogin() {
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            const errorDiv = document.getElementById('login-error');
+            
+            errorDiv.textContent = '';
+            
+            if (!email || !password) {
+                errorDiv.textContent = 'الرجاء ملء جميع الحقول';
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    errorDiv.textContent = 'المستخدم غير موجود';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorDiv.textContent = 'كلمة المرور خاطئة';
+                } else {
+                    errorDiv.textContent = 'خطأ في تسجيل الدخول: ' + error.message;
+                }
+            }
+        }
+        
+        // ==================== تسجيل الخروج ====================
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                auth.signOut();
+            }
+        }
+        
+        // ==================== تحميل جميع البيانات ====================
+        async function loadAllData() {
+            await loadProducts();
+            await loadOrders();
+            updateStats();
+        }
+        
+        // ==================== إدارة المنتجات ====================
+        async function loadProducts() {
+            try {
+                const snapshot = await db.collection('products').orderBy('name').get();
+                const productsList = document.getElementById('products-list');
+                
+                if (snapshot.empty) {
+                    productsList.innerHTML = '<p>لا توجد منتجات حتى الآن.</p>';
+                    return;
+                }
+                
+                let html = '';
+                snapshot.forEach(doc => {
+                    const product = doc.data();
+                    html += `
+                        <div class="product-item">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4>${product.name}</h4>
+                                    <p>السعر: ${product.price} ريال | الفئة: ${getCategoryName(product.category)}</p>
+                                    ${product.description ? `<p>${product.description.substring(0, 50)}...</p>` : ''}
+                                </div>
+                                <div>
+                                    <button class="btn" onclick="editProduct('${doc.id}')" style="padding: 5px 10px;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')" style="padding: 5px 10px;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                productsList.innerHTML = html;
+                document.getElementById('products-count').textContent = snapshot.size;
+            } catch (error) {
+                console.error('خطأ في تحميل المنتجات:', error);
+                document.getElementById('products-list').innerHTML = '<p style="color: red;">خطأ في تحميل المنتجات</p>';
+            }
+        }
+        
+        // ==================== إضافة منتج جديد ====================
+        function showAddProductForm() {
+            document.getElementById('add-product-form').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        
+        function hideAddProductForm() {
+            document.getElementById('add-product-form').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            resetProductForm();
+        }
+        
+        function resetProductForm() {
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-category').value = '';
+            document.getElementById('product-image').value = '📦';
+            document.getElementById('product-description').value = '';
+            document.getElementById('product-badge').value = '';
+        }
+        
+        async function addProduct() {
+            const name = document.getElementById('product-name').value.trim();
+            const price = document.getElementById('product-price').value.trim();
+            const category = document.getElementById('product-category').value;
+            const image = document.getElementById('product-image').value.trim() || '📦';
+            const description = document.getElementById('product-description').value.trim();
+            const badge = document.getElementById('product-badge').value.trim();
+            
+            // التحقق من البيانات
+            if (!name || !price || !category) {
+                alert('الرجاء ملء الحقول المطلوبة (الاسم، السعر، الفئة)');
+                return;
+            }
+            
+            try {
+                await db.collection('products').add({
+                    name: name,
+                    price: parseFloat(price),
+                    category: category,
+                    image: image,
+                    description: description,
+                    badge: badge || null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('تم إضافة المنتج بنجاح!');
+                hideAddProductForm();
+                loadProducts();
+                updateStats();
+            } catch (error) {
+                console.error('خطأ في إضافة المنتج:', error);
+                alert('حدث خطأ في إضافة المنتج: ' + error.message);
+            }
+        }
+        
+        // ==================== تعديل منتج ====================
+        async function editProduct(productId) {
+            try {
+                const doc = await db.collection('products').doc(productId).get();
+                if (!doc.exists) {
+                    alert('المنتج غير موجود');
+                    return;
+                }
+                
+                const product = doc.data();
+                
+                // يمكننا عمل نموذج تعديل مشابه للإضافة
+                const newName = prompt('الاسم الجديد:', product.name);
+                if (!newName) return;
+                
+                const newPrice = prompt('السعر الجديد:', product.price);
+                if (!newPrice) return;
+                
+                await db.collection('products').doc(productId).update({
+                    name: newName,
+                    price: parseFloat(newPrice),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('تم تحديث المنتج بنجاح!');
+                loadProducts();
+            } catch (error) {
+                console.error('خطأ في تعديل المنتج:', error);
+                alert('حدث خطأ في تعديل المنتج');
+            }
+        }
+        
+        // ==================== حذف منتج ====================
+        async function deleteProduct(productId) {
+            if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                return;
+            }
+            
+            try {
+                await db.collection('products').doc(productId).delete();
+                alert('تم حذف المنتج بنجاح!');
+                loadProducts();
+                updateStats();
+            } catch (error) {
+                console.error('خطأ في حذف المنتج:', error);
+                alert('حدث خطأ في حذف المنتج');
+            }
+        }
+        
+        // ==================== إدارة الطلبات ====================
+        async function loadOrders() {
+            try {
+                const snapshot = await db.collection('orders').orderBy('timestamp', 'desc').limit(10).get();
+                const ordersList = document.getElementById('orders-list');
+                
+                if (snapshot.empty) {
+                    ordersList.innerHTML = '<p>لا توجد طلبات حتى الآن.</p>';
+                    return;
+                }
+                
+                let totalSales = 0;
+                let html = '';
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    totalSales += order.total || 0;
+                    
+                    const date = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleDateString('ar-SA') : 'غير محدد';
+                    
+                    html += `
+                        <div class="order-item">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4>طلب #${doc.id.substring(0, 8)}</h4>
+                                    <p>📞 ${order.customerPhone || 'غير محدد'}</p>
+                                    <p>📍 ${order.address?.substring(0, 30)}...</p>
+                                    <p>💰 ${order.total || 0} ريال | 📅 ${date}</p>
+                                    <p>الحالة: <span style="color: ${getStatusColor(order.status)}">${order.status || 'قيد المعالجة'}</span></p>
+                                </div>
+                                <div>
+                                    <button class="btn" onclick="viewOrder('${doc.id}')" style="padding: 5px 10px;">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn" onclick="updateOrderStatus('${doc.id}')" style="padding: 5px 10px;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                ordersList.innerHTML = html;
+                document.getElementById('orders-count').textContent = snapshot.size;
+                document.getElementById('total-sales').textContent = totalSales;
+            } catch (error) {
+                console.error('خطأ في تحميل الطلبات:', error);
+                document.getElementById('orders-list').innerHTML = '<p style="color: red;">خطأ في تحميل الطلبات</p>';
+            }
+        }
+        
+        // ==================== تحديث حالة الطلب ====================
+        async function updateOrderStatus(orderId) {
+            const statuses = ['قيد المعالجة', 'تم التأكيد', 'جاري التجهيز', 'تم الشحن', 'مكتمل', 'ملغى'];
+            const newStatus = prompt(`اختر الحالة الجديدة:\n${statuses.join('\n')}`, 'قيد المعالجة');
+            
+            if (!newStatus) return;
+            
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('تم تحديث حالة الطلب بنجاح!');
+                loadOrders();
+            } catch (error) {
+                console.error('خطأ في تحديث حالة الطلب:', error);
+                alert('حدث خطأ في تحديث حالة الطلب');
+            }
+        }
+        
+        // ==================== عرض تفاصيل الطلب ====================
+        async function viewOrder(orderId) {
+            try {
+                const doc = await db.collection('orders').doc(orderId).get();
+                if (!doc.exists) {
+                    alert('الطلب غير موجود');
+                    return;
+                }
+                
+                const order = doc.data();
+                let message = `تفاصيل الطلب #${orderId}\n\n`;
+                message += `📞 الهاتف: ${order.customerPhone || 'غير محدد'}\n`;
+                message += `📍 العنوان: ${order.address || 'غير محدد'}\n`;
+                message += `💳 طريقة الدفع: ${order.payment || 'غير محدد'}\n`;
+                message += `💰 المجموع: ${order.total || 0} ريال\n`;
+                message += `📅 التاريخ: ${order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('ar-SA') : 'غير محدد'}\n`;
+                message += `📝 ملاحظات: ${order.notes || 'لا توجد'}\n\n`;
+                
+                if (order.cart && order.cart.length > 0) {
+                    message += `🛒 المنتجات:\n`;
+                    order.cart.forEach((item, index) => {
+                        message += `${index + 1}. ${item.name} × ${item.quantity} = ${item.price * item.quantity} ريال\n`;
+                    });
+                }
+                
+                alert(message);
+            } catch (error) {
+                console.error('خطأ في عرض تفاصيل الطلب:', error);
+                alert('حدث خطأ في عرض تفاصيل الطلب');
+            }
+        }
+        
+        // ==================== دوال مساعدة ====================
+        function getCategoryName(category) {
+            const categories = {
+                'offers': 'العروض',
+                'accessories': 'الإكسسوارات',
+                'cosmetics': 'مستحضرات التجميل',
+                'clothing': 'الملابس',
+                'electronics': 'الإلكترونيات',
+                'home': 'أدوات منزلية'
+            };
+            return categories[category] || category;
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                'قيد المعالجة': '#F59E0B',
+                'تم التأكيد': '#3B82F6',
+                'جاري التجهيز': '#8B5CF6',
+                'تم الشحن': '#10B981',
+                'مكتمل': '#059669',
+                'ملغى': '#EF4444'
+            };
+            return colors[status] || '#6B7280';
+        }
+        
+        function updateStats() {
+            // يتم تحديث الإحصائيات تلقائياً في loadProducts و loadOrders
+        }
+        
+        function refreshData() {
+            loadAllData();
+            alert('تم تحديث البيانات');
+        }
+        
+        // ==================== تهيئة عند تحميل الصفحة ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة حدث للضغط على زر الإدخال في نموذج تسجيل الدخول
+            document.getElementById('admin-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    adminLogin();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
