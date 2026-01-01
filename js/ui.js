@@ -21,10 +21,7 @@ class UIManager {
         this.setupScrollHandler();
         this.setupSecurityFeatures();
         
-        // التحقق من عناصر DOM
         console.log('UIManager: تم التهيئة');
-        console.log('cartIcon موجود:', !!this.cartIcon);
-        console.log('cartSidebar موجود:', !!this.cartSidebar);
     }
     
     setupEventListeners() {
@@ -37,7 +34,7 @@ class UIManager {
             });
         }
         
-        // فتح سلة المشتريات - إصلاح هنا
+        // فتح سلة المشتريات
         if (this.cartIcon) {
             console.log('UIManager: إعداد حدث النقر على cart-icon');
             
@@ -52,8 +49,6 @@ class UIManager {
             this.cartIcon.addEventListener('animationend', () => {
                 this.cartIcon.classList.remove('cart-pulse');
             });
-        } else {
-            console.error('UIManager: cart-icon غير موجود في DOM');
         }
         
         // إغلاق سلة المشتريات
@@ -207,7 +202,7 @@ class UIManager {
         
         if (hasDanger) {
             input.classList.add('suspicious');
-            window.uiManager?.showNotification('تحذير أمني', 
+            this.showNotification('تحذير أمني', 
                 'تم اكتشاف محتوى مشبوه في المدخلات', 'warning');
         } else if (value.length > 10 && !hasDanger) {
             input.classList.add('secure');
@@ -242,8 +237,6 @@ class UIManager {
             if (this.cartIcon) {
                 this.cartIcon.classList.add('cart-pulse');
             }
-        } else {
-            console.error('UIManager: cart-sidebar غير موجود');
         }
     }
     
@@ -296,10 +289,10 @@ class UIManager {
         // إظهار الإشعار
         this.notification.classList.add('show');
         
-        // إخفاء الإشعار تلقائياً بعد 3 ثوانٍ
+        // إخفاء الإشعار تلقائياً بعد 2 ثانية (مختصر)
         this.notificationTimeout = setTimeout(() => {
             this.hideNotification();
-        }, 3000);
+        }, 2000);
     }
     
     // إخفاء الإشعار
@@ -309,6 +302,85 @@ class UIManager {
             if (this.notificationTimeout) {
                 clearTimeout(this.notificationTimeout);
             }
+        }
+    }
+    
+    // عرض إشعار السلة في الموبايل
+    showCartNotificationMobile() {
+        if (window.innerWidth > 768) return; // عرض في الموبايل فقط
+        
+        // إزالة أي إشعار سابق
+        this.removeCartNotificationMobile();
+        
+        const cartItemCount = window.cartManager?.getItemCount() || 0;
+        
+        if (cartItemCount === 0) return;
+        
+        const notification = document.createElement('div');
+        notification.className = 'cart-notification-mobile';
+        notification.id = 'cart-notification-mobile';
+        notification.innerHTML = `
+            <div class="cart-notification-info">
+                <i class="fas fa-shopping-bag"></i>
+                <div>
+                    <div style="font-weight: bold; font-size: 0.9rem;">${cartItemCount} منتج في السلة</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">انقر لعرض السلة</div>
+                </div>
+            </div>
+            <div class="cart-notification-actions">
+                <button class="cart-notification-btn view-cart">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="cart-notification-btn checkout-now">
+                    <i class="fas fa-shopping-bag"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // إظهار الإشعار بعد تأخير بسيط
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // إضافة مستمعي الأحداث
+        setTimeout(() => {
+            // فتح السلة عند النقر على الإشعار
+            notification.querySelector('.cart-notification-info').addEventListener('click', () => {
+                this.openCartSidebar();
+                this.removeCartNotificationMobile();
+            });
+            
+            // فتح السلة عند النقر على زر العرض
+            notification.querySelector('.view-cart').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openCartSidebar();
+                this.removeCartNotificationMobile();
+            });
+            
+            // إتمام الطلب مباشرة
+            notification.querySelector('.checkout-now').addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.checkoutManager?.openCheckoutModal();
+                this.removeCartNotificationMobile();
+            });
+            
+            // إخفاء الإشعار بعد 5 ثوان
+            setTimeout(() => {
+                this.removeCartNotificationMobile();
+            }, 5000);
+        }, 50);
+    }
+    
+    // إزالة إشعار السلة في الموبايل
+    removeCartNotificationMobile() {
+        const notification = document.getElementById('cart-notification-mobile');
+        if (notification) {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
         }
     }
     
