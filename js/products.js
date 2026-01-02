@@ -883,4 +883,38 @@ window.productsManager = {
 };
 
 console.log('✅ products.js تم التحميل بنجاح');
+// دالة تهيئة يجب استدعاؤها من app.js
+window.productsManagerInit = function() {
+    if (!window.productsManager) {
+        console.log('📦 إنشاء productsManager جديد...');
+        window.productsManager = {
+            categories,
+            products,
+            paymentMethods,
+            initCategories,
+            initPaymentMethods,
+            switchCategory,
+            renderOffers,
+            renderProducts,
+            getProductById,
+            getCategoryName,
+            loadProductsFromJSON,
+            reloadProducts,
+            startProducts
+        };
+    }
+    
+    // تهيئة الفئات فوراً
+    initCategories();
+    
+    // تهيئة طرق الدفع
+    initPaymentMethods();
+    
+    console.log('✅ productsManager جاهز');
+};
+
+// جعل الدوال متاحة للاستدعاء مباشرة
+window.switchCategory = switchCategory;
+window.renderOffers = renderOffers;
+window.initCategories = initCategories;
 [file content end]
