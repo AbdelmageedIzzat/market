@@ -18,11 +18,11 @@ class App {
             // التحقق من العناصر المهمة
             this.checkEssentialElements();
             
-            // محاولة تحميل Firebase (في الخلفية)
-            this.initFirebaseInBackground();
-            
             // بدء عرض المنتجات بعد تهيئة المكونات
             this.showProductsImmediately();
+            
+            // محاولة تحميل Firebase (في الخلفية)
+            this.initFirebaseInBackground();
             
             console.log('✅ التطبيق جاهز للاستخدام');
             
@@ -33,6 +33,80 @@ class App {
             setTimeout(() => this.showProductsImmediately(), 1000);
         }
     }
+    
+    // ========== دالة فحص اتصال Firebase ==========
+    async checkFirebaseConnection() {
+        console.log('🔥 فحص اتصال Firebase...');
+        
+        try {
+            if (!window.db) {
+                console.log('❌ Firebase غير مهيأ');
+                return false;
+            }
+            
+            // اختبار بسيط للاتصال
+            const testDoc = await window.db.collection('products').limit(1).get();
+            console.log(`✅ Firebase متصل، ${testDoc.size} منتج متاح`);
+            
+            // تحميل الإحصائيات إذا أمكن
+            if (testDoc.size > 0) {
+                try {
+                    const productsCount = await window.db.collection('products').count().get();
+                    console.log(`📊 إجمالي المنتجات في Firebase: ${productsCount.data().count}`);
+                } catch (countError) {
+                    console.log('⚠️ لا يمكن جلب العدد، لكن الاتصال ناجح');
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('❌ خطأ في اتصال Firebase:', error.message);
+            return false;
+        }
+    }
+    
+    // ========== دالة تهيئة Firebase في الخلفية ==========
+    async initFirebaseInBackground() {
+        console.log('🔥 تهيئة Firebase في الخلفية...');
+        
+        try {
+            // انتظار تحميل Firebase SDK
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // فحص الاتصال
+            const isConnected = await this.checkFirebaseConnection();
+            
+            if (isConnected && window.productsManager && window.productsManager.loadProductsFromJSON) {
+                console.log('🔄 جاري تحديث المنتجات من Firebase...');
+                
+                // تحميل وتحديث البيانات
+                const updated = await window.productsManager.loadProductsFromJSON();
+                
+                if (updated) {
+                    // تحديث العرض فقط إذا تم التحديث بنجاح
+                    const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
+                    if (window.productsManager.switchCategory) {
+                        window.productsManager.switchCategory(activeCategory);
+                        
+                        // إشعار للمستخدم
+                        setTimeout(() => {
+                            if (window.uiManager) {
+                                window.uiManager.showNotification(
+                                    'تم التحديث', 
+                                    'تم تحميل أحدث المنتجات من السحابة',
+                                    'success'
+                                );
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('ℹ️ Firebase غير متاح، نستخدم البيانات المحلية');
+        }
+    }
+    
+    // ========== باقي الدوال (كما هي) ==========
     
     // عرض المنتجات فوراً
     showProductsImmediately() {
@@ -164,44 +238,8 @@ class App {
             window.searchManager = new SearchManager();
         }
     }
-    
-   async initFirebaseInBackground() {
-    console.log('🔥 تهيئة Firebase في الخلفية...');
-    
-    try {
-        // انتظار تحميل Firebase SDK
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // فحص الاتصال
-        const isConnected = await this.checkFirebaseConnection();
-        
-        if (isConnected && window.productsManager && window.productsManager.loadProductsFromJSON) {
-            console.log('🔄 جاري تحديث المنتجات من Firebase...');
-            
-            // تحميل وتحديث البيانات
-            await window.productsManager.loadProductsFromJSON();
-            
-            // تحديث العرض
-            const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
-            if (window.productsManager.switchCategory) {
-                window.productsManager.switchCategory(activeCategory);
-                
-                // إشعار للمستخدم
-                setTimeout(() => {
-                    if (window.uiManager) {
-                        window.uiManager.showNotification(
-                            'تم التحديث', 
-                            'تم تحميل أحدث المنتجات من السحابة',
-                            'success'
-                        );
-                    }
-                }, 1000);
-            }
-        }
-    } catch (error) {
-        console.log('ℹ️ Firebase غير متاح، نستخدم البيانات المحلية');
-    }
 }
+
 // بدء تشغيل التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM محمل بالكامل، بدء التطبيق...');
@@ -250,37 +288,14 @@ window.debugStore = function() {
         console.log('عدد المنتجات: غير معروف');
     }
     
-    // فحص العناصر المهمة
-    ['offers', 'categories', 'cart-icon'].forEach(id => {
-        const el = document.getElementById(id);
-        console.log(`${id}:`, el ? '✅ موجود' : '❌ غير موجود');
-    });
+    // فحص Firebase
+    console.log('window.db:', window.db ? '✅ موجود' : '❌ غير موجود');
+    if (window.db) {
+        window.db.collection('products').limit(1).get()
+            .then(snap => console.log('منتجات Firebase:', snap.size))
+            .catch(err => console.log('خطأ Firebase:', err.message));
+    }
     
     console.log('==================');
 };
-async checkFirebaseConnection() {
-    console.log('🔥 فحص اتصال Firebase...');
-    
-    try {
-        if (!window.db) {
-            console.log('❌ Firebase غير مهيأ');
-            return false;
-        }
-        
-        // اختبار بسيط للاتصال
-        const testDoc = await window.db.collection('products').limit(1).get();
-        console.log(`✅ Firebase متصل، ${testDoc.size} منتج متاح`);
-        
-        // تحميل الإحصائيات إذا أمكن
-        if (testDoc.size > 0) {
-            const productsCount = await window.db.collection('products').count().get();
-            console.log(`📊 إجمالي المنتجات في Firebase: ${productsCount.data().count}`);
-        }
-        
-        return true;
-    } catch (error) {
-        console.error('❌ خطأ في اتصال Firebase:', error.message);
-        return false;
-    }
-}
 [file content end]
