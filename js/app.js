@@ -1,5 +1,6 @@
-// js/app.js
+[file name]: app.js
 [file content begin]
+// js/app.js
 class App {
     constructor() {
         console.log('🚀 بدء تشغيل التطبيق...');
@@ -8,8 +9,8 @@ class App {
     
     async init() {
         try {
-            // بدء عرض المنتجات فوراً (لا تنتظر Firebase)
-            this.showProductsImmediately();
+            // تهيئة المكونات أولاً
+            this.initComponents();
             
             // معالجة الأخطاء العامة
             this.setupErrorHandling();
@@ -17,11 +18,11 @@ class App {
             // التحقق من العناصر المهمة
             this.checkEssentialElements();
             
-            // تهيئة المكونات الأخرى
-            this.initComponents();
-            
             // محاولة تحميل Firebase (في الخلفية)
             this.initFirebaseInBackground();
+            
+            // بدء عرض المنتجات بعد تهيئة المكونات
+            this.showProductsImmediately();
             
             console.log('✅ التطبيق جاهز للاستخدام');
             
@@ -29,7 +30,7 @@ class App {
             console.error('❌ خطأ في التهيئة:', error);
             
             // مع ذلك، حاول عرض المنتجات
-            this.showProductsImmediately();
+            setTimeout(() => this.showProductsImmediately(), 1000);
         }
     }
     
@@ -37,7 +38,14 @@ class App {
     showProductsImmediately() {
         console.log('📦 عرض المنتجات فوراً...');
         
-        if (window.productsManager) {
+        // انتظار تحميل productsManager إذا لم يكن جاهزاً
+        if (!window.productsManager) {
+            console.log('⏳ انتظار تهيئة productsManager...');
+            setTimeout(() => this.showProductsImmediately(), 100);
+            return;
+        }
+        
+        try {
             // عرض المنتجات مباشرة من البيانات المحلية
             window.productsManager.startProducts();
             
@@ -56,10 +64,8 @@ class App {
                     );
                 }
             }, 1000);
-        } else {
-            console.error('❌ productsManager غير متاح');
-            
-            // محاولة عرض المنتجات يدوياً
+        } catch (error) {
+            console.error('❌ خطأ في عرض المنتجات:', error);
             this.showProductsManually();
         }
     }
@@ -74,12 +80,13 @@ class App {
             if (offersSection) {
                 offersSection.innerHTML = `
                     <div class="offers-section">
-                        <h2>العروض الحالية</h2>
-                        <p>جاري تحميل المنتجات...</p>
+                        <h2 style="text-align: center; margin-bottom: 20px; color: #3A36E0;">
+                            <i class="fas fa-tags"></i> العروض الحالية
+                        </h2>
                         <div style="text-align: center; padding: 50px;">
-                            <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary);"></i>
-                            <p style="margin-top: 20px;">يرجى الانتظار جاري تحميل المتجر</p>
-                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px;">
+                            <i class="fas fa-spinner fa-spin fa-3x" style="color: #3A36E0;"></i>
+                            <p style="margin-top: 20px; color: #666;">جاري تحميل المنتجات...</p>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #3A36E0; color: white; border: none; border-radius: 8px; font-weight: bold;">
                                 إعادة تحميل الصفحة
                             </button>
                         </div>
@@ -127,25 +134,31 @@ class App {
     initComponents() {
         console.log('⚙️ تهيئة المكونات...');
         
-        // تهيئة CartManager إذا لم يكن موجوداً
+        // تهيئة ProductsManager أولاً
+        if (!window.productsManager && window.productsManagerInit) {
+            console.log('📦 تهيئة ProductsManager');
+            window.productsManagerInit();
+        }
+        
+        // تهيئة CartManager
         if (!window.cartManager && window.CartManager) {
             console.log('🛒 تهيئة CartManager');
             window.cartManager = new CartManager();
         }
         
-        // تهيئة UIManager إذا لم يكن موجوداً
+        // تهيئة UIManager
         if (!window.uiManager && window.UIManager) {
             console.log('🎨 تهيئة UIManager');
             window.uiManager = new UIManager();
         }
         
-        // تهيئة CheckoutManager إذا لم يكن موجوداً
+        // تهيئة CheckoutManager
         if (!window.checkoutManager && window.CheckoutManager) {
             console.log('💳 تهيئة CheckoutManager');
             window.checkoutManager = new CheckoutManager();
         }
         
-        // تهيئة SearchManager إذا لم يكن موجوداً
+        // تهيئة SearchManager
         if (!window.searchManager && window.SearchManager) {
             console.log('🔍 تهيئة SearchManager');
             window.searchManager = new SearchManager();
@@ -168,7 +181,9 @@ class App {
                 
                 // تحديث العرض إذا نجح
                 const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
-                window.productsManager.switchCategory(activeCategory);
+                if (window.productsManager.switchCategory) {
+                    window.productsManager.switchCategory(activeCategory);
+                }
                 
                 console.log('✅ تم تحديث المنتجات من Firebase (إن وجدت)');
             }
@@ -180,6 +195,8 @@ class App {
 
 // بدء تشغيل التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM محمل بالكامل، بدء التطبيق...');
+    
     // تأخير بسيط للتأكد من تحميل المكتبات الأساسية
     setTimeout(() => {
         try {
@@ -192,16 +209,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (offersSection) {
                 offersSection.innerHTML = `
                     <div style="text-align: center; padding: 50px;">
-                        <h2>Global Store</h2>
-                        <p>متجر عالمي للتسوق الإلكتروني</p>
-                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3A36E0; color: white; border: none; border-radius: 8px;">
+                        <h2 style="color: #3A36E0; margin-bottom: 20px;">Global Store</h2>
+                        <p style="color: #666; margin-bottom: 30px;">متجر عالمي للتسوق الإلكتروني</p>
+                        <button onclick="location.reload()" style="padding: 12px 24px; background: #3A36E0; color: white; border: none; border-radius: 8px; font-weight: bold; margin: 5px;">
                             إعادة تحميل المتجر
+                        </button>
+                        <button onclick="window.debugStore()" style="padding: 12px 24px; background: #6A66FF; color: white; border: none; border-radius: 8px; font-weight: bold; margin: 5px;">
+                            تصحيح الأخطاء
                         </button>
                     </div>
                 `;
             }
         }
-    }, 100);
+    }, 300);
 });
 
 // جعل التطبيق متاحاً للتصحيح
@@ -213,7 +233,20 @@ window.debugStore = function() {
     console.log('productsManager:', window.productsManager ? '✅ موجود' : '❌ غير موجود');
     console.log('cartManager:', window.cartManager ? '✅ موجود' : '❌ غير موجود');
     console.log('uiManager:', window.uiManager ? '✅ موجود' : '❌ غير موجود');
-    console.log('عدد المنتجات:', window.productsManager ? Object.values(window.productsManager.products).flat().length : 'غير معروف');
+    
+    if (window.productsManager && window.productsManager.products) {
+        const totalProducts = Object.values(window.productsManager.products).flat().length;
+        console.log('عدد المنتجات:', totalProducts);
+    } else {
+        console.log('عدد المنتجات: غير معروف');
+    }
+    
+    // فحص العناصر المهمة
+    ['offers', 'categories', 'cart-icon'].forEach(id => {
+        const el = document.getElementById(id);
+        console.log(`${id}:`, el ? '✅ موجود' : '❌ غير موجود');
+    });
+    
     console.log('==================');
 };
 [file content end]
