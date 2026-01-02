@@ -967,3 +967,51 @@
         border-radius: 20px;
     }
 }
+/* تحسينات للمنتجات على الموبايل */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions button {
+        width: 100%;
+    }
+    
+    .product-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .quantity-control {
+        order: 1;
+        align-self: center;
+    }
+    
+    .add-to-cart-btn {
+        order: 2;
+    }
+}
+
+/* تحسينات للسلة على الموبايل */
+@media (max-width: 480px) {
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .cart-item-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .checkout-summary {
+        padding: 15px;
+    }
+}
