@@ -247,15 +247,15 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<!-- ملفات التطبيق -->
+<!-- ملفات التطبيق - بنفس الترتيب المحدد -->
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-init.js"></script>
-<script src="js/products.js"></script>
+<script src="js/products.js"></script>  <!-- هذا يجب أن يكون قبل app.js -->
 <script src="js/cart.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/checkout.js"></script>
 <script src="js/search.js"></script>
-<script src="js/app.js"></script>
+<script src="js/app.js"></script>  <!-- هذا يجب أن يكون بعد products.js -->
 
 <script>
     // التحقق النهائي من التحميل
