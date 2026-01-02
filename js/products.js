@@ -404,89 +404,125 @@ const paymentMethods = [
     }
 ];
 
-// دالة لتحميل المنتجات من Firebase أو استخدام البيانات المحلية
+// ========== دالة محسنة لتحميل المنتجات من Firebase ==========
 async function loadProductsFromJSON() {
-    console.log('📦 بدء تحميل المنتجات...');
+    console.log('📦 بدء تحميل المنتجات من Firebase...');
     
     try {
-        // محاولة الاتصال بـ Firebase أولاً
-        if (window.db && typeof window.db.collection === 'function') {
-            console.log('🔥 محاولة تحميل من Firebase...');
-            
-            try {
-                // اختبار الاتصال مع مهلة زمنية
-                const testConnection = await Promise.race([
-                    window.db.collection('products').limit(1).get(),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('انتهت مهلة الاتصال')), 3000))
-                ]);
-                
-                if (testConnection && !testConnection.empty) {
-                    console.log('✅ Firebase متصل، جاري تحميل المنتجات...');
-                    
-                    // الحصول على جميع المنتجات
-                    const snapshot = await window.db.collection('products').get();
-                    
-                    if (!snapshot.empty) {
-                        console.log(`✅ تم العثور على ${snapshot.size} منتج في Firebase`);
-                        
-                        // مسح البيانات الحالية
-                        const currentProducts = {};
-                        Object.keys(products).forEach(key => currentProducts[key] = []);
-                        
-                        // تعبئة المنتجات الجديدة
-                        snapshot.forEach(doc => {
-                            const productData = doc.data();
-                            const product = {
-                                id: doc.id,
-                                name: productData.name || 'منتج بدون اسم',
-                                price: productData.price || 0,
-                                image: productData.image || '📦',
-                                description: productData.description || '',
-                                badge: productData.badge || null,
-                                category: productData.category || 'offers',
-                                oldPrice: productData.oldPrice || null,
-                                discount: productData.discount || null,
-                                timeLeft: productData.timeLeft || null
-                            };
-                            
-                            // إضافة المنتج للفئة المناسبة
-                            const category = product.category;
-                            if (currentProducts[category]) {
-                                currentProducts[category].push(product);
-                            } else {
-                                currentProducts.offers.push(product);
-                            }
-                        });
-                        
-                        // تحديث البيانات الأصلية
-                        Object.keys(products).forEach(key => {
-                            products[key] = currentProducts[key] || [];
-                        });
-                        
-                        console.log('✅ تم تحميل منتجات Firebase بنجاح');
-                        return true;
-                    } else {
-                        console.log('⚠️ Firebase فارغ، استخدام البيانات المحلية');
-                    }
-                }
-            } catch (firebaseError) {
-                console.log('❌ خطأ في Firebase:', firebaseError.message);
-                // الاستمرار في استخدام البيانات المحلية
-            }
-        } else {
+        // التحقق من اتصال Firebase
+        if (!window.db || typeof window.db.collection !== 'function') {
             console.log('ℹ️ Firebase غير متاح، استخدام البيانات المحلية');
+            return false;
         }
         
-        // استخدام البيانات المحلية (التي تم تعريفها بالفعل)
-        console.log('✅ استخدام البيانات المحلية الاحتياطية');
-        console.log(`📊 عدد المنتجات: ${Object.values(products).reduce((sum, arr) => sum + arr.length, 0)}`);
+        // محاولة جلب المنتجات مع مهلة زمنية
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('انتهت مهلة الاتصال بـ Firebase')), 5000)
+        );
+        
+        const productsPromise = window.db.collection('products').get();
+        
+        const snapshot = await Promise.race([productsPromise, timeoutPromise]);
+        
+        if (snapshot.empty) {
+            console.log('⚠️ Firebase متصل لكن لا توجد منتجات');
+            return false;
+        }
+        
+        console.log(`✅ تم العثور على ${snapshot.size} منتج في Firebase`);
+        
+        // تنظيف البيانات الحالية
+        const newProducts = {
+            offers: [],
+            accessories: [],
+            cosmetics: [],
+            clothing: [],
+            electronics: [],
+            home: []
+        };
+        
+        // تعبئة البيانات الجديدة
+        snapshot.forEach(doc => {
+            const productData = doc.data();
+            const productId = doc.id;
+            
+            const product = {
+                id: productId,
+                name: productData.name || 'منتج بدون اسم',
+                price: parseFloat(productData.price) || 0,
+                image: productData.image || '📦',
+                description: productData.description || '',
+                badge: productData.badge || null,
+                category: productData.category || 'offers'
+            };
+            
+            // إضافة بيانات إضافية للعروض
+            if (productData.category === 'offers') {
+                product.oldPrice = parseFloat(productData.oldPrice) || null;
+                product.discount = parseInt(productData.discount) || null;
+                product.timeLeft = productData.timeLeft || null;
+            }
+            
+            // إضافة المنتج للفئة المناسبة
+            const category = product.category;
+            if (newProducts[category]) {
+                newProducts[category].push(product);
+            } else {
+                // إذا كانت الفئة غير معروفة، أضف للعروض
+                newProducts.offers.push(product);
+            }
+        });
+        
+        // تحديث المتغير العالمي
+        Object.keys(products).forEach(key => {
+            products[key] = newProducts[key] || [];
+        });
+        
+        console.log('✅ تم تحديث بيانات المنتجات من Firebase');
+        console.log('📊 إحصائيات:', {
+            offers: products.offers.length,
+            accessories: products.accessories.length,
+            cosmetics: products.cosmetics.length,
+            clothing: products.clothing.length,
+            electronics: products.electronics.length,
+            home: products.home.length
+        });
         
         return true;
         
     } catch (error) {
-        console.error('❌ خطأ في تحميل المنتجات:', error);
+        console.error('❌ خطأ في تحميل المنتجات من Firebase:', error.message);
         return false;
     }
+}
+
+// ========== دالة لبدء المنتجات مع Firebase ==========
+async function startProducts() {
+    console.log('🚀 بدء عرض المنتجات...');
+    
+    // تهيئة الفئات
+    initCategories();
+    
+    // تهيئة طرق الدفع
+    initPaymentMethods();
+    
+    // محاولة تحميل من Firebase
+    const firebaseLoaded = await loadProductsFromJSON();
+    
+    if (!firebaseLoaded) {
+        console.log('ℹ️ استخدام البيانات المحلية');
+    }
+    
+    // عرض الفئة النشطة
+    const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
+    switchCategory(activeCategory);
+    
+    // تحديث عداد السلة
+    if (window.cartManager) {
+        window.cartManager.updateCartUI();
+    }
+    
+    console.log('✅ المنتجات جاهزة للعرض');
 }
 
 // دالة لتهيئة الفئات
