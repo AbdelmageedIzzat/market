@@ -582,7 +582,80 @@
                 document.getElementById('orders-list').innerHTML = '<p style="color: red;">خطأ في تحميل الطلبات</p>';
             }
         }
+        // بعد دالة loadOrders
+async function loadCustomers() {
+    try {
+        const snapshot = await db.collection('orders').get();
+        const phones = new Set();
+        const customers = [];
         
+        snapshot.forEach(doc => {
+            const order = doc.data();
+            if (order.customerPhone && !phones.has(order.customerPhone)) {
+                phones.add(order.customerPhone);
+                customers.push({
+                    phone: order.customerPhone,
+                    orders: 1,
+                    totalSpent: order.total || 0,
+                    lastOrder: order.timestamp
+                });
+            }
+        });
+        
+        const customersList = document.getElementById('customers-list');
+        customersList.innerHTML = customers.map(c => `
+            <div class="customer-item">
+                <p>📞 ${c.phone}</p>
+                <p>عدد الطلبات: ${c.orders} | إجمالي المشتريات: ${c.totalSpent} ريال</p>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('خطأ في تحميل العملاء:', error);
+    }
+}
+
+// دالة تصدير العملاء
+async function exportCustomers() {
+    try {
+        const snapshot = await db.collection('orders').get();
+        const customers = {};
+        
+        snapshot.forEach(doc => {
+            const order = doc.data();
+            if (order.customerPhone) {
+                if (!customers[order.customerPhone]) {
+                    customers[order.customerPhone] = {
+                        phone: order.customerPhone,
+                        orders: 0,
+                        totalSpent: 0,
+                        addresses: new Set()
+                    };
+                }
+                customers[order.customerPhone].orders++;
+                customers[order.customerPhone].totalSpent += order.total || 0;
+                if (order.address) customers[order.customerPhone].addresses.add(order.address);
+            }
+        });
+        
+        let csv = 'رقم الهاتف,عدد الطلبات,إجمالي المشتريات,العناوين\n';
+        Object.values(customers).forEach(c => {
+            csv += `${c.phone},${c.orders},${c.totalSpent},"${Array.from(c.addresses).join('; ')}"\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `customers_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        alert('تم تصدير بيانات العملاء بنجاح!');
+    } catch (error) {
+        console.error('خطأ في تصدير العملاء:', error);
+    }
+}
         // ==================== تحديث حالة الطلب ====================
         async function updateOrderStatus(orderId) {
             const statuses = ['قيد المعالجة', 'تم التأكيد', 'جاري التجهيز', 'تم الشحن', 'مكتمل', 'ملغى'];
