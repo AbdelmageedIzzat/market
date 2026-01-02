@@ -249,4 +249,29 @@ window.debugStore = function() {
     
     console.log('==================');
 };
+async checkFirebaseConnection() {
+    console.log('🔥 فحص اتصال Firebase...');
+    
+    try {
+        if (!window.db) {
+            console.log('❌ Firebase غير مهيأ');
+            return false;
+        }
+        
+        // اختبار بسيط للاتصال
+        const testDoc = await window.db.collection('products').limit(1).get();
+        console.log(`✅ Firebase متصل، ${testDoc.size} منتج متاح`);
+        
+        // تحميل الإحصائيات إذا أمكن
+        if (testDoc.size > 0) {
+            const productsCount = await window.db.collection('products').count().get();
+            console.log(`📊 إجمالي المنتجات في Firebase: ${productsCount.data().count}`);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ خطأ في اتصال Firebase:', error.message);
+        return false;
+    }
+}
 [file content end]
