@@ -285,7 +285,36 @@ class CartManager {
             console.error('خطأ في حفظ السلة:', error);
         }
     }
+    // بعد دالة saveCart
+applyDiscount(code) {
+    const discounts = {
+        'WELCOME10': 0.10,
+        'SUMMER20': 0.20,
+        'SPECIAL15': 0.15
+    };
     
+    if (discounts[code]) {
+        this.discount = discounts[code];
+        this.updateCartUI();
+        return true;
+    }
+    return false;
+}
+
+// في دالة updateCartTotals
+const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+const discountAmount = this.discount ? subtotal * this.discount : 0;
+const total = subtotal - discountAmount;
+
+// عرض الخصم في السلة
+if (discountAmount > 0) {
+    if (this.cartSubtotal) {
+        this.cartSubtotal.innerHTML = `
+            <div>المجموع الجزئي: ${subtotal.toFixed(2)} ريال</div>
+            <div style="color: var(--success);">الخصم: -${discountAmount.toFixed(2)} ريال</div>
+        `;
+    }
+}
     // الحصول على منتج من السلة
     getCartItem(productId) {
         return this.cart.find(item => item.id === productId) || null;
