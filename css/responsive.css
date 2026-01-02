@@ -347,6 +347,118 @@
 }
 
 /* الهواتف الصغيرة */
+/* ===== إصلاح حجم الخطوط والأيقونات في الموبايل ===== */
+
+@media (max-width: 768px) {
+    /* تقليل حجم الخطوط الأساسية */
+    body {
+        font-size: 14px;
+    }
+    
+    /* تقليل حجم العناوين */
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.3rem; }
+    h3 { font-size: 1.2rem; }
+    h4 { font-size: 1.1rem; }
+    
+    /* تقليل حجم الأيقونات */
+    i.fas, i.fab {
+        font-size: 1em !important;
+    }
+    
+    /* إصلاح أيقونات المنتجات */
+    .product-image, .offer-image, .cart-item-image {
+        font-size: 2rem !important;
+    }
+    
+    /* تقليل حجم النصوص داخل البطاقات */
+    .product-name, .offer-name {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+    
+    .product-description, .offer-description {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+    
+    /* تقليل حجم أزرار الفئات */
+    .category-btn {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+    
+    .category-btn i {
+        font-size: 0.9rem;
+    }
+    
+    /* تقليل حجم الأزرار */
+    .btn, .add-to-cart-btn, .checkout-btn {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+    
+    .btn i, .add-to-cart-btn i, .checkout-btn i {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: 13px;
+    }
+    
+    .product-image, .offer-image, .cart-item-image {
+        font-size: 1.8rem !important;
+    }
+    
+    .product-name, .offer-name {
+        font-size: 0.85rem;
+    }
+    
+    .product-price, .new-price, .old-price {
+        font-size: 0.9rem;
+    }
+    
+    /* إصلاح شريط الفئات */
+    .categories {
+        gap: 5px;
+    }
+    
+    .category-btn {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 12px;
+    }
+    
+    .product-image, .offer-image {
+        height: 180px;
+        font-size: 1.5rem !important;
+    }
+    
+    .cart-item-image {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem !important;
+    }
+    
+    /* تحسين أزرار الكمية */
+    .quantity-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+    }
+    
+    .quantity {
+        font-size: 0.9rem;
+    }
+}
 @media (max-width: 480px) {
     .header-actions {
         gap: 10px;
