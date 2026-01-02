@@ -42,7 +42,33 @@ window.productsManager = {
             console.error('❌ offers section غير موجود');
             return;
         }
+        // بعد سطر window.productsManager = { ... }
+window.productsManager.updateFromFirebase = async function() {
+    if (!window.db) {
+        console.log('Firebase غير متاح');
+        return;
+    }
+    
+    try {
+        const snapshot = await window.db.collection('products').get();
+        if (snapshot.empty) {
+            console.log('Firebase فارغ، استخدام البيانات المحلية');
+            return;
+        }
         
+        console.log(`تم تحميل ${snapshot.size} منتج من Firebase`);
+        // هنا يمكنك تحديث products إذا أردت
+    } catch (error) {
+        console.log('خطأ في Firebase:', error.message);
+    }
+};
+
+// تشغيل في الخلفية
+setTimeout(() => {
+    if (window.productsManager.updateFromFirebase) {
+        window.productsManager.updateFromFirebase();
+    }
+}, 3000);
         // HTML للمنتجات
         offersSection.innerHTML = this.createProductsHTML();
         console.log('✅ المنتجات معروضة');
