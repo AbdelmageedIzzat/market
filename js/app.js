@@ -165,34 +165,43 @@ class App {
         }
     }
     
-    async initFirebaseInBackground() {
-        console.log('🔥 تهيئة Firebase في الخلفية...');
+   async initFirebaseInBackground() {
+    console.log('🔥 تهيئة Firebase في الخلفية...');
+    
+    try {
+        // انتظار تحميل Firebase SDK
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        try {
-            // انتظار تحميل Firebase
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // فحص الاتصال
+        const isConnected = await this.checkFirebaseConnection();
+        
+        if (isConnected && window.productsManager && window.productsManager.loadProductsFromJSON) {
+            console.log('🔄 جاري تحديث المنتجات من Firebase...');
             
-            // إذا كان Firebase متاحاً، حاول تحميل المنتجات منه
-            if (window.db && window.productsManager && window.productsManager.loadProductsFromJSON) {
-                console.log('🔄 محاولة تحديث المنتجات من Firebase...');
+            // تحميل وتحديث البيانات
+            await window.productsManager.loadProductsFromJSON();
+            
+            // تحديث العرض
+            const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
+            if (window.productsManager.switchCategory) {
+                window.productsManager.switchCategory(activeCategory);
                 
-                // تحميل من Firebase (قد يستبدل البيانات المحلية)
-                await window.productsManager.loadProductsFromJSON();
-                
-                // تحديث العرض إذا نجح
-                const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'offers';
-                if (window.productsManager.switchCategory) {
-                    window.productsManager.switchCategory(activeCategory);
-                }
-                
-                console.log('✅ تم تحديث المنتجات من Firebase (إن وجدت)');
+                // إشعار للمستخدم
+                setTimeout(() => {
+                    if (window.uiManager) {
+                        window.uiManager.showNotification(
+                            'تم التحديث', 
+                            'تم تحميل أحدث المنتجات من السحابة',
+                            'success'
+                        );
+                    }
+                }, 1000);
             }
-        } catch (error) {
-            console.log('ℹ️ Firebase غير متاح أو به مشكلة، نستخدم البيانات المحلية');
         }
+    } catch (error) {
+        console.log('ℹ️ Firebase غير متاح، نستخدم البيانات المحلية');
     }
 }
-
 // بدء تشغيل التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM محمل بالكامل، بدء التطبيق...');
