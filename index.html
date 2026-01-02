@@ -12,6 +12,94 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
+    <script>
+// تحميل طارئ مضمون
+(function() {
+    console.log('🔄 تحميل طارئ يعمل...');
+    
+    // دالة لعرض المنتجات مباشرة
+    function showProductsDirectly() {
+        const offersSection = document.getElementById('offers');
+        if (!offersSection) return;
+        
+        // إذا كان فارغاً أو لا يحتوي على منتجات
+        if (offersSection.innerHTML === '' || !offersSection.innerHTML.includes('offer-card')) {
+            console.log('🆘 عرض منتجات مباشرة...');
+            
+            offersSection.innerHTML = `
+                <div class="offers-section">
+                    <h2 style="text-align: center; color: #3A36E0; margin-bottom: 30px;">
+                        <i class="fas fa-tags"></i> متجر Global Store
+                    </h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 20px;">
+                        <!-- منتج 1 -->
+                        <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); text-align: center; transition: transform 0.3s;">
+                            <div style="font-size: 3.5rem; margin-bottom: 20px; color: #3A36E0;">⌚</div>
+                            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">ساعة يد فاخرة</h3>
+                            <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">ساعة أنيقة بتصميم عصري يناسب جميع المناسبات</p>
+                            <div style="background: linear-gradient(135deg, #3A36E0, #6A66FF); color: white; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 1.3rem; margin-bottom: 20px;">
+                                350 ريال
+                            </div>
+                            <button onclick="alert('تم الإضافة للسلة')" style="background: #00D4AA; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">
+                                <i class="fas fa-shopping-cart"></i> أضف للسلة
+                            </button>
+                        </div>
+                        
+                        <!-- منتج 2 -->
+                        <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); text-align: center; transition: transform 0.3s;">
+                            <div style="font-size: 3.5rem; margin-bottom: 20px; color: #FF6B8B;">💄</div>
+                            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">مجموعة تجميل كاملة</h3>
+                            <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">مجموعة متكاملة من أفضل مستحضرات التجميل العالمية</p>
+                            <div style="background: linear-gradient(135deg, #FF6B8B, #FF9EB3); color: white; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 1.3rem; margin-bottom: 20px;">
+                                180 ريال
+                            </div>
+                            <button onclick="alert('تم الإضافة للسلة')" style="background: #00D4AA; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">
+                                <i class="fas fa-shopping-cart"></i> أضف للسلة
+                            </button>
+                        </div>
+                        
+                        <!-- منتج 3 -->
+                        <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); text-align: center; transition: transform 0.3s;">
+                            <div style="font-size: 3.5rem; margin-bottom: 20px; color: #00D4AA;">👕</div>
+                            <h3 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">ملابس صيفية موضة 2024</h3>
+                            <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">أحدث صيحات الموضة الصيفية بجودة عالية وتصميمات فريدة</p>
+                            <div style="background: linear-gradient(135deg, #00D4AA, #5CFFD6); color: white; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 1.3rem; margin-bottom: 20px;">
+                                120 ريال
+                            </div>
+                            <button onclick="alert('تم الإضافة للسلة')" style="background: #00D4AA; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">
+                                <i class="fas fa-shopping-cart"></i> أضف للسلة
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 40px; padding: 25px; background: #f8f9ff; border-radius: 15px;">
+                        <h3 style="color: #333; margin-bottom: 20px;">فئات المتجر</h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                            <button style="background: #3A36E0; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">العروض</button>
+                            <button style="background: #FF6B8B; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">إكسسوارات</button>
+                            <button style="background: #00D4AA; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">تجميل</button>
+                            <button style="background: #6A66FF; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">ملابس</button>
+                            <button style="background: #FFB74D; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">إلكترونيات</button>
+                            <button style="background: #9575CD; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">منزلية</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            console.log('✅ المنتجات المعرضة مباشرة');
+        }
+    }
+    
+    // تشغيل بعد 2 ثانية كحد أقصى
+    setTimeout(showProductsDirectly, 2000);
+    
+    // أيضاً تشغيل عند تحميل الصفحة
+    window.addEventListener('load', () => {
+        setTimeout(showProductsDirectly, 1000);
+    });
+})();
+</script>
 <body>
     <!-- زر العودة للأعلى -->
     <button class="back-to-top" id="back-to-top">
