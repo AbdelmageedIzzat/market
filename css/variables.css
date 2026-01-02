@@ -128,3 +128,29 @@ h6 { font-size: var(--font-sm); }
 .en-font {
     font-family: 'Roboto', sans-serif;
 }
+/* ألوان إضافية */
+:root {
+    /* ألوان التصنيف */
+    --rating: #FFD700;
+    --rating-light: #FFF4CC;
+    
+    /* ألوان الحالة */
+    --new: #00D4AA;
+    --bestseller: #FF6B8B;
+    --sale: #EF4444;
+    
+    /* ظلال إضافية */
+    --shadow-soft: 0 2px 15px rgba(0, 0, 0, 0.05);
+    --shadow-hard: 0 5px 20px rgba(0, 0, 0, 0.1);
+    
+    /* تحسينات للرسوم المتحركة */
+    --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* أحجام إضافية */
+:root {
+    --font-tiny: 0.625rem;   /* 10px */
+    --font-huge: 2rem;       /* 32px */
+    --font-giant: 2.5rem;    /* 40px */
+}
